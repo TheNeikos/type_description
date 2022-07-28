@@ -128,27 +128,6 @@ jobs:
       - name: cargo-clippy
         run: cargo clippy --all --all-targets --all-features -- -D warnings
 
-
-  #coverage:
-  #  needs: check
-  #  name: coverage
-  #  runs-on: ubuntu-latest
-  #  container:
-  #    image: xd009642/tarpaulin:develop-nightly
-  #    options: --security-opt seccomp=unconfined
-  #  steps:
-  #    - name: Checkout repository
-  #      uses: actions/checkout@v3
-  #    - name: Generate code coverage
-  #      run: |
-  #        cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out Xml
-  #    - name: Upload to codecov.io
-  #      uses: codecov/codecov-action@v2
-  #      with:
-  #        # token: ${{secrets.CODECOV_TOKEN}} # not required for public repos
-  #        fail_ci_if_error: true
-
-
   outdated:
     needs: check
     name: outdated
@@ -178,11 +157,6 @@ jobs:
         target:
           # TIER 1
           - aarch64-unknown-linux-gnu
-          # TIER 2 w/ host tools
-          - armv7-unknown-linux-gnueabihf
-          - aarch64-unknown-linux-musl
-          - riscv64gc-unknown-linux-gnu
-          - x86_64-unknown-freebsd
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
@@ -205,7 +179,6 @@ jobs:
       matrix:
         target:
           - aarch64-unknown-linux-gnu
-          - armv7-unknown-linux-gnueabihf
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
