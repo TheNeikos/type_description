@@ -3,9 +3,5 @@
 version = 3
 
 [[package]]
-name = "example-bin"
-version = "0.1.0"
-
-[[package]]
-name = "example-lib"
+name = "type_description"
 version = "0.1.0"
