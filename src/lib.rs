@@ -93,7 +93,12 @@ pub enum TypeKind {
     Array(Box<TypeDescription>),
 
     /// Type represents a hashmap of named types of the same type
-    HashMap(Box<TypeDescription>),
+    HashMap {
+        /// The key of the HashMap
+        key: Box<TypeDescription>,
+        /// The value of the HashMap
+        value: Box<TypeDescription>,
+    },
 
     /// Type represents a map of different types
     ///
@@ -140,21 +145,18 @@ impl<T: AsTypeDescription> AsTypeDescription for Vec<T> {
     }
 }
 
-impl<V: AsTypeDescription> AsTypeDescription for HashMap<String, V> {
+impl<K: AsTypeDescription, V: AsTypeDescription> AsTypeDescription for HashMap<K, V> {
     fn as_type_description() -> TypeDescription {
         TypeDescription::new(
-            format!("Table of '{}'s", V::as_type_description().name()),
-            TypeKind::HashMap(Box::new(V::as_type_description())),
-            None,
-        )
-    }
-}
-
-impl<V: AsTypeDescription> AsTypeDescription for HashMap<std::path::PathBuf, V> {
-    fn as_type_description() -> TypeDescription {
-        TypeDescription::new(
-            format!("Table of '{}'s", V::as_type_description().name()),
-            TypeKind::HashMap(Box::new(V::as_type_description())),
+            format!(
+                "Table of '{}' => '{}'s",
+                K::as_type_description().name(),
+                V::as_type_description().name()
+            ),
+            TypeKind::HashMap {
+                key: Box::new(K::as_type_description()),
+                value: Box::new(V::as_type_description()),
+            },
             None,
         )
     }
@@ -223,7 +225,34 @@ mod tests {
         println!("Complex config: {:#?}", complex_config);
 
         assert!(
-            matches!(complex_config.kind(), TypeKind::HashMap(map) if matches!(map.kind(), TypeKind::Array(arr) if matches!(arr.kind(), TypeKind::HashMap(inner_map) if matches!(inner_map.kind(), TypeKind::String))))
+            matches!(complex_config.kind(), TypeKind::HashMap { value, .. } if matches!(value.kind(), TypeKind::Array(arr) if matches!(arr.kind(), TypeKind::HashMap { value, .. } if matches!(value.kind(), TypeKind::String))))
         );
+    }
+
+    #[test]
+    fn test_key_value() {
+        let kv = HashMap::<i32, Vec<f64>>::as_type_description();
+
+        match kv.kind() {
+            TypeKind::HashMap { key, value } => {
+                match value.kind() {
+                    TypeKind::Array(arr) => {
+                        match arr.kind() {
+                            TypeKind::Float => { /* good */ }
+                            other => panic!("Expected Float, got {:?}", other),
+                        }
+                    }
+
+                    other => panic!("Expected Array, got {:?}", other),
+                }
+
+                match key.kind() {
+                    TypeKind::Integer => { /* good */ }
+                    other => panic!("Expected Integer, got {:?}", other),
+                }
+            }
+
+            other => panic!("Expected HashMap, got {:?}", other),
+        }
     }
 }
