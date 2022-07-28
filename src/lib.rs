@@ -37,13 +37,6 @@ impl TypeDescription {
         &self.kind
     }
 
-    /// Set or replace the documentation of this [`TypeDescription`]
-    #[must_use]
-    pub fn with_doc(mut self, doc: Option<&'static str>) -> Self {
-        self.doc = doc;
-        self
-    }
-
     /// Get the config's name.
     #[must_use]
     pub fn name(&self) -> &str {
