@@ -3,14 +3,17 @@
 //   License, v. 2.0. If a copy of the MPL was not distributed with this
 //   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //
+#![deny(missing_docs)]
+#![doc = include_str!("../README.md")]
 
 use std::collections::HashMap;
 
 use serde::Serialize;
 
+/// A derive macro that helps implementing [`AsTypeDescription`]
 pub use type_description_derive::TypeDescription;
 
-/// Generic config that represents what kind of config a plugin wishes to accept
+/// Generic description of a type
 #[derive(Debug, Serialize, PartialEq)]
 pub struct TypeDescription {
     name: String,
@@ -19,32 +22,32 @@ pub struct TypeDescription {
 }
 
 impl TypeDescription {
-    /// Construct a new generic config explanation
+    /// Construct a new generic type description
     #[must_use]
     pub fn new(name: String, kind: TypeKind, doc: Option<&'static str>) -> Self {
         Self { name, kind, doc }
     }
 
-    /// Get a reference to the config's documentation.
+    /// Get a reference to the type's documentation.
     #[must_use]
     pub fn doc(&self) -> Option<&'static str> {
         self.doc
     }
 
-    /// Get a reference to the config's kind.
+    /// Get a reference to the type's kind.
     #[must_use]
     pub fn kind(&self) -> &TypeKind {
         &self.kind
     }
 
-    /// Get the config's name.
+    /// Get the type's name.
     #[must_use]
     pub fn name(&self) -> &str {
         &self.name
     }
 }
 
-/// How an enum is represented
+/// Representation of an enum
 #[derive(Debug, Serialize, PartialEq)]
 pub enum EnumVariantRepresentation {
     /// The enum is represented by a string
@@ -55,7 +58,7 @@ pub enum EnumVariantRepresentation {
     Wrapped(Box<TypeDescription>),
 }
 
-/// The kind of enum tagging used by the [`TypeKind`]
+/// The kind of enum tagging used by the [`TypeKind::Enum`]
 #[derive(Debug, Serialize, PartialEq)]
 pub enum TypeEnumKind {
     /// An internal tag with the given tag name
@@ -64,53 +67,40 @@ pub enum TypeEnumKind {
     Untagged,
 }
 
-/// The specific kind a [`TypeDescription`] represents
+/// The specific kind a [`struct@TypeDescription`] represents
 #[derive(Debug, Serialize, PartialEq)]
 pub enum TypeKind {
     /// Type represents a boolean `true`/`false`
     Bool,
 
     /// Type represents an integer `1, 10, 200, 10_000, ...`
-    ///
-    /// # Note
-    ///
-    /// The maximum value that can be represented is between [`i64::MIN`] and [`i64::MAX`]
     Integer,
 
     /// Type represents a floating point value `1.0, 20.235, 3.1419`
-    ///
-    /// # Note
-    /// Integers are also accepted and converted to their floating point variant
-    ///
-    /// The maximum value that can be represented is between [`f64::MIN`] and [`f64::MAX`]
     Float,
 
     /// Type represents a string
     String,
 
-    /// Wrap another config
+    /// Wrap another type
     ///
     /// This is particularly useful if you want to restrict another kind. The common example is a
-    /// `Port` config object which is represented as a `u16` but with an explanation of what it is
+    /// `Port` type which is represented as a `u16` but with an explanation of what it is
     /// meant to represent.
     Wrapped(Box<TypeDescription>),
 
     /// Type represents an array of values of the given [`TypeKind`]
     Array(Box<TypeDescription>),
 
-    /// Type represents a hashmap of named configurations of the same type
-    ///
-    /// # Note
-    ///
-    /// The key is always a [`String`] so this only holds the value config
+    /// Type represents a hashmap of named types of the same type
     HashMap(Box<TypeDescription>),
 
-    /// Type represents a map of different configurations
+    /// Type represents a map of different types
     ///
-    /// The tuple represent `(field_name, documentation, config_description)`
+    /// The tuple represent `(field_name, documentation, type_description)`
     Struct(Vec<(&'static str, Option<&'static str>, TypeDescription)>),
 
-    /// Type represents multiple choice of configurations
+    /// Type represents multiple choice of type variants
     Enum(
         TypeEnumKind,
         Vec<(
@@ -121,11 +111,12 @@ pub enum TypeKind {
     ),
 }
 
-/// Turn a plugin configuration into a [`TypeDescription`] object
+/// Turn a Rust type into a [`struct@TypeDescription`] object
 ///
-/// Plugin authors are expected to implement this for their configurations to give users
+/// Crate authors can either implement this manually or use the [`derive@TypeDescription`] derive
+/// macro.
 pub trait AsTypeDescription {
-    /// Get a [`TypeDescription`] object from the type
+    /// Get a [`struct@TypeDescription`] object from the type
     fn as_type_description() -> TypeDescription;
 }
 
