@@ -6,4 +6,9 @@ license = "MPL-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace]
+members = [ "type_description_derive" ]
+
 [dependencies]
+serde = { version = "1.0.140", features = ["derive"] }
+type_description_derive = { version = "0.1.0", path = "type_description_derive" }
