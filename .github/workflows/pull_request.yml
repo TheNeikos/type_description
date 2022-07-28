@@ -1,0 +1,121 @@
+on:
+  pull_request:
+
+name: Pull Request Checks
+
+jobs:
+  block-fixup:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Block fixup commit merge
+      uses: 13rac1/block-fixup-merge-action@v2.0.0
+
+
+  rd-redpen:
+    name: rd-redpen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: redpen-github-pr-review
+        uses: tsuyoshicho/action-redpen@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          basedir: "doc"
+          targets: "*.md"
+          config: "config/redpen-conf-en.xml"
+
+
+  rd-languagetool:
+    name: rd-languagetool
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: reviewdog/action-languagetool@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          level: info
+
+
+  rd-alex:
+    name: rd-alex
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: reviewdog/action-alex@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          level: warning
+
+  rd-markdownlint:
+    name: rd-markdownlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: markdownlint
+        uses: reviewdog/action-markdownlint@v0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+
+
+  rd-misspell:
+    name: rd-misspell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: misspell
+        uses: reviewdog/action-misspell@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          locale: "US"
+
+  commit-lint:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - run: pip install gitlint
+      - run: gitlint --commits $(git merge-base origin/master HEAD)..HEAD
+
+  apidiff:
+    name: apidiff
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    strategy:
+      matrix:
+        crate:
+          - example-lib
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - uses: swatinem/rust-cache@v1
+      - run: cargo install --locked cargo-public-api
+      - run: echo -e "### API changes\n\n" >> apidiff.txt
+      - run: echo -e "<details><summary>API diff in ${{ matrix.crate }}</summary>\n" >> apidiff.txt
+      - run: echo "\`\`\`" >> apidiff.txt
+      - run: cargo public-api --with-blanket-implementations --manifest-path ${{ matrix.crate }}/Cargo.toml --diff-git-checkouts $(git merge-base origin/master $GITHUB_SHA) $GITHUB_SHA |& tee -a apidiff.txt
+      - run: echo "\`\`\`" >> apidiff.txt
+      - run: echo -e "</details>\n" >> apidiff.txt
+      - name: "Post to PR"
+        uses: machine-learning-apps/pr-comment@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path: apidiff.txt
+

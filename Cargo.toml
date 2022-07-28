@@ -1,0 +1,7 @@
+[workspace]
+
+members = [
+    "example-bin",
+    "example-lib",
+]
+
