@@ -13,6 +13,11 @@ categories = ["config", "rust-patterns", "value-formatting"]
 [workspace]
 members = ["type_description_derive"]
 
+[features]
+default = ["render"]
+render = [ "indexmap" ]
+
 [dependencies]
+indexmap = { version = "1.9.1", optional = true }
 serde = { version = "1.0.140", features = ["derive"] }
 type_description_derive = { version = "0.2.0", path = "type_description_derive" }
