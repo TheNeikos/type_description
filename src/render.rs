@@ -127,7 +127,7 @@ pub fn render_to_markdown(desc: &TypeDescription) -> Result<String, std::fmt::Er
                                 markdown,
                                 "- `{}`: {}",
                                 variant.name(),
-                                variant.doc().unwrap_or(&"_No doc_")
+                                variant.doc().unwrap_or("_No doc_")
                             )?;
                         }
                         crate::EnumVariantRepresentation::Wrapped(wrapped_ty) => {
@@ -136,7 +136,7 @@ pub fn render_to_markdown(desc: &TypeDescription) -> Result<String, std::fmt::Er
                                 "- `{}` ({}): {}",
                                 variant.name(),
                                 wrapped_ty.name(),
-                                variant.doc().unwrap_or(&"_No doc_")
+                                variant.doc().unwrap_or("_No doc_")
                             )?;
                         }
                     }
