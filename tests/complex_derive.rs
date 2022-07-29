@@ -1,4 +1,4 @@
-use type_description::{render::render_to_markdown, AsTypeDescription, TypeDescription};
+use type_description::{AsTypeDescription, TypeDescription};
 
 /// How to configure a kubernetes cluster
 ///
