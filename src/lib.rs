@@ -172,7 +172,7 @@ impl<K: AsTypeDescription, V: AsTypeDescription> AsTypeDescription for HashMap<K
     fn as_type_description() -> TypeDescription {
         TypeDescription::new(
             format!(
-                "Table of '{}' => '{}'s",
+                "Table of '{} => {}'",
                 K::as_type_description().name(),
                 V::as_type_description().name()
             ),
