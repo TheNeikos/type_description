@@ -23,11 +23,7 @@ fn get_list_of_types(desc: &TypeDescription) -> IndexSet<&TypeDescription> {
                 remaining.push(key);
             }
             crate::TypeKind::Struct(strt) => {
-                remaining.extend(
-                    strt.iter()
-                        .rev()
-                        .map(|(_, _, td): &(&str, Option<&str>, TypeDescription)| td),
-                );
+                remaining.extend(strt.iter().rev().map(|field| &field.kind));
             }
         }
     }
@@ -103,35 +99,45 @@ pub fn render_to_markdown(desc: &TypeDescription) -> Result<String, std::fmt::Er
             crate::TypeKind::Struct(strct) => {
                 writeln!(markdown)?;
                 writeln!(markdown, "**Fields:**")?;
+                writeln!(markdown)?;
 
-                for (field_name, field_doc, field_ty) in strct {
+                for field in strct {
                     writeln!(
                         markdown,
-                        "- `{field_name}` ({}): {}",
-                        field_ty.name(),
-                        field_doc.unwrap_or("_No doc_")
+                        "- `{}` ({}): {}",
+                        field.name(),
+                        field.kind().name(),
+                        field.doc().as_ref().unwrap_or(&"_No doc_")
                     )?;
                 }
             }
             crate::TypeKind::Enum(tag_kind, variants) => {
                 write!(markdown, "**Variants:** ")?;
                 if let TypeEnumKind::Tagged(tag) = tag_kind {
-                    writeln!(markdown, "(Tagged in field `{tag}`)")?;
+                    writeln!(markdown, "(Tagged with field `{tag}`)")?;
                 } else {
                     writeln!(markdown, "Untagged")?;
                 };
+                writeln!(markdown)?;
 
-                for (variant_name, variant_doc, variant_ty) in variants {
-                    match variant_ty {
+                for variant in variants {
+                    match variant.repr() {
                         crate::EnumVariantRepresentation::String(_) => {
                             writeln!(
                                 markdown,
-                                "- `{variant_name}`: {}",
-                                variant_doc.unwrap_or("")
+                                "- `{}`: {}",
+                                variant.name(),
+                                variant.doc().unwrap_or(&"_No doc_")
                             )?;
                         }
                         crate::EnumVariantRepresentation::Wrapped(wrapped_ty) => {
-                            writeln!(markdown, "- `{variant_name}` (): {}", wrapped_ty.name())?;
+                            writeln!(
+                                markdown,
+                                "- `{}` ({}): {}",
+                                variant.name(),
+                                wrapped_ty.name(),
+                                variant.doc().unwrap_or(&"_No doc_")
+                            )?;
                         }
                     }
                 }
