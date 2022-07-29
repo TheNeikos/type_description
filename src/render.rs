@@ -37,6 +37,9 @@ fn get_list_of_types(desc: &TypeDescription) -> IndexSet<&TypeDescription> {
 /// # Example
 ///
 /// ```rust
+///     use type_description::AsTypeDescription;
+///     use type_description::render::render_to_markdown;
+///
 ///     let ty_desc = std::collections::HashMap::<String, Vec<String>>::as_type_description();
 ///     let markdown = render_to_markdown(&ty_desc).unwrap();
 ///
