@@ -36,6 +36,32 @@ fn get_list_of_types(desc: &TypeDescription) -> IndexSet<&TypeDescription> {
 }
 
 /// Render a [`struct@TypeDescription`] to a Markdown string
+///
+///
+/// # Example
+///
+/// ```rust
+///     let ty_desc = std::collections::HashMap::<String, Vec<String>>::as_type_description();
+///     let markdown = render_to_markdown(&ty_desc).unwrap();
+///
+///     println!("{markdown}");
+/// ```
+///
+/// Renders:
+///
+/// # Table of 'String => Array of 'String's'
+///
+///
+/// _Key: String, Values: Array of 'String's_
+///
+/// # String
+///
+/// An UTF-8 string
+///
+/// # Array of 'String's
+///
+///
+/// _Array Elements of String_
 pub fn render_to_markdown(desc: &TypeDescription) -> Result<String, std::fmt::Error> {
     use std::fmt::Write;
 
