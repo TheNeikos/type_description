@@ -30,6 +30,18 @@ jobs:
       - uses: swatinem/rust-cache@v1
       - run: cargo check
 
+  check-lock-diff-check:
+    name: check-lock-diff-check
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@1.60.0
+      - uses: swatinem/rust-cache@v1
+      - run: cargo generate-lockfile
+      - run: git status --porcelain | grep -q Cargo.lock && echo "Lockfile has diff" && exit 1
+
+
   flake-check:
     runs-on: ubuntu-latest
     steps:
