@@ -74,7 +74,13 @@ pub enum TypeKind {
     Bool,
 
     /// Type represents an integer `1, 10, 200, 10_000, ...`
-    Integer,
+    Integer {
+        /// Sign of the integer
+        sign: Sign,
+
+        /// Size of the integer
+        size: u8,
+    },
 
     /// Type represents a floating point value `1.0, 20.235, 3.1419`
     Float,
@@ -114,6 +120,16 @@ pub enum TypeKind {
             EnumVariantRepresentation,
         )>,
     ),
+}
+
+/// Whether an integer is a signed integer or an unsigned integer
+#[derive(Debug, Serialize, PartialEq)]
+pub enum Sign {
+    /// A signed integer
+    Signed,
+
+    /// An unsigned integer
+    Unsigned,
 }
 
 /// Turn a Rust type into a [`struct@TypeDescription`] object
@@ -174,25 +190,25 @@ macro_rules! impl_config_kind {
     };
 }
 
-impl_config_kind!(TypeKind::Integer; "Integer"; "A signed integer with 64 bits" => i64);
-impl_config_kind!(TypeKind::Integer; "Integer"; "A signed integer with 64 bits that cannot be zero" => std::num::NonZeroI64);
-impl_config_kind!(TypeKind::Integer; "Integer"; "An unsigned integer with 64 bits" => u64);
-impl_config_kind!(TypeKind::Integer; "Integer"; "An unsigned integer with 64 bits that cannot be zero" => std::num::NonZeroU64);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Signed, size: 64 }; "Integer"; "A signed integer with 64 bits" => i64);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Signed, size: 64 }; "Integer"; "A signed integer with 64 bits that cannot be zero" => std::num::NonZeroI64);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Unsigned, size: 64 }; "Integer"; "An unsigned integer with 64 bits" => u64);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Unsigned, size: 64 }; "Integer"; "An unsigned integer with 64 bits that cannot be zero" => std::num::NonZeroU64);
 
-impl_config_kind!(TypeKind::Integer; "Integer"; "A signed integer with 32 bits" => i32);
-impl_config_kind!(TypeKind::Integer; "Integer"; "A signed integer with 32 bits that cannot be zero" => std::num::NonZeroI32);
-impl_config_kind!(TypeKind::Integer; "Integer"; "An unsigned integer with 32 bits" => u32);
-impl_config_kind!(TypeKind::Integer; "Integer"; "An unsigned integer with 32 bits that cannot be zero" => std::num::NonZeroU32);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Signed, size: 32 }; "Integer"; "A signed integer with 32 bits" => i32);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Signed, size: 32 }; "Integer"; "A signed integer with 32 bits that cannot be zero" => std::num::NonZeroI32);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Unsigned, size: 32 }; "Integer"; "An unsigned integer with 32 bits" => u32);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Unsigned, size: 32 }; "Integer"; "An unsigned integer with 32 bits that cannot be zero" => std::num::NonZeroU32);
 
-impl_config_kind!(TypeKind::Integer; "Integer"; "A signed integer with 16 bits" => i16);
-impl_config_kind!(TypeKind::Integer; "Integer"; "A signed integer with 16 bits that cannot be zero" => std::num::NonZeroI16);
-impl_config_kind!(TypeKind::Integer; "Integer"; "An unsigned integer with 16 bits" => u16);
-impl_config_kind!(TypeKind::Integer; "Integer"; "An unsigned integer with 16 bits that cannot be zero" => std::num::NonZeroU16);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Signed, size: 16 }; "Integer"; "A signed integer with 16 bits" => i16);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Signed, size: 16 }; "Integer"; "A signed integer with 16 bits that cannot be zero" => std::num::NonZeroI16);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Unsigned, size: 16 }; "Integer"; "An unsigned integer with 16 bits" => u16);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Unsigned, size: 16 }; "Integer"; "An unsigned integer with 16 bits that cannot be zero" => std::num::NonZeroU16);
 
-impl_config_kind!(TypeKind::Integer; "Integer"; "A signed integer with 8 bits" => i8);
-impl_config_kind!(TypeKind::Integer; "Integer"; "A signed integer with 8 bits that cannot be zero" => std::num::NonZeroI8);
-impl_config_kind!(TypeKind::Integer; "Integer"; "An unsigned integer with 8 bits" => u8);
-impl_config_kind!(TypeKind::Integer; "Integer"; "An unsigned integer with 8 bits that cannot be zero" => std::num::NonZeroU8);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Signed, size: 8 }; "Integer"; "A signed integer with 8 bits" => i8);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Signed, size: 8 }; "Integer"; "A signed integer with 8 bits that cannot be zero" => std::num::NonZeroI8);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Unsigned, size: 8 }; "Integer"; "An unsigned integer with 8 bits" => u8);
+impl_config_kind!(TypeKind::Integer { sign: Sign::Unsigned, size: 8 }; "Integer"; "An unsigned integer with 8 bits that cannot be zero" => std::num::NonZeroU8);
 
 impl_config_kind!(TypeKind::Float; "Float"; "A floating point value with 64 bits" => f64);
 impl_config_kind!(TypeKind::Float; "Float"; "A floating point value with 32 bits" => f32);
@@ -208,7 +224,7 @@ impl_config_kind!(TypeKind::String; "String"; "An IPv6 socket address" => std::n
 mod tests {
     use std::collections::HashMap;
 
-    use super::{AsTypeDescription, TypeDescription, TypeKind};
+    use super::{AsTypeDescription, Sign, TypeDescription, TypeKind};
 
     #[test]
     fn verify_correct_config_kinds() {
@@ -247,7 +263,10 @@ mod tests {
                 }
 
                 match key.kind() {
-                    TypeKind::Integer => { /* good */ }
+                    TypeKind::Integer {
+                        size: 32,
+                        sign: Sign::Signed,
+                    } => { /* good */ }
                     other => panic!("Expected Integer, got {:?}", other),
                 }
             }

@@ -18,6 +18,7 @@ the user.
 use type_description::AsTypeDescription;
 use type_description::TypeDescription;
 use type_description::TypeKind;
+use type_description::Sign;
 
 /// A configuration
 #[derive(TypeDescription)]
@@ -49,7 +50,7 @@ match desc.kind() {
         assert_eq!(second_field.1, Some("The Port"));
         assert_eq!(second_field.2.name(), "Integer");
         assert_eq!(second_field.2.doc(), Some("An unsigned integer with 16 bits"));
-        assert_eq!(*second_field.2.kind(), type_description::TypeKind::Integer);
+        assert_eq!(*second_field.2.kind(), type_description::TypeKind::Integer { size: 16, sign: Sign::Unsigned });
     }
     _ => unreachable!()
 }
