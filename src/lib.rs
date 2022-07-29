@@ -83,7 +83,10 @@ pub enum TypeKind {
     },
 
     /// Type represents a floating point value `1.0, 20.235, 3.1419`
-    Float,
+    Float {
+        /// The size of the value
+        size: u8,
+    },
 
     /// Type represents a string
     String,
@@ -210,8 +213,8 @@ impl_config_kind!(TypeKind::Integer { sign: Sign::Signed, size: 8 }; "Integer"; 
 impl_config_kind!(TypeKind::Integer { sign: Sign::Unsigned, size: 8 }; "Integer"; "An unsigned integer with 8 bits" => u8);
 impl_config_kind!(TypeKind::Integer { sign: Sign::Unsigned, size: 8 }; "Integer"; "An unsigned integer with 8 bits that cannot be zero" => std::num::NonZeroU8);
 
-impl_config_kind!(TypeKind::Float; "Float"; "A floating point value with 64 bits" => f64);
-impl_config_kind!(TypeKind::Float; "Float"; "A floating point value with 32 bits" => f32);
+impl_config_kind!(TypeKind::Float { size: 64 }; "Float"; "A floating point value with 64 bits" => f64);
+impl_config_kind!(TypeKind::Float { size: 32 }; "Float"; "A floating point value with 32 bits" => f32);
 
 impl_config_kind!(TypeKind::Bool; "Boolean"; "A boolean" => bool);
 impl_config_kind!(TypeKind::String; "String"; "An UTF-8 string" => String);
@@ -234,7 +237,7 @@ mod tests {
                 doc: None,
                 kind: TypeKind::Array(x),
                 ..
-            } if matches!(x.kind(), TypeKind::Float)
+            } if matches!(x.kind(), TypeKind::Float { size: 64 })
         ));
 
         let complex_config = HashMap::<String, Vec<HashMap<String, String>>>::as_type_description();
@@ -254,7 +257,7 @@ mod tests {
                 match value.kind() {
                     TypeKind::Array(arr) => {
                         match arr.kind() {
-                            TypeKind::Float => { /* good */ }
+                            TypeKind::Float { size: 64 } => { /* good */ }
                             other => panic!("Expected Float, got {:?}", other),
                         }
                     }
