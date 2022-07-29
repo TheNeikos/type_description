@@ -13,8 +13,12 @@ use serde::Serialize;
 /// A derive macro that helps implementing [`AsTypeDescription`]
 pub use type_description_derive::TypeDescription;
 
+/// Rendering support for [`struct@TypeDescription`]s
+#[cfg(feature = "render")]
+pub mod render;
+
 /// Generic description of a type
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Eq, Hash)]
 pub struct TypeDescription {
     name: String,
     kind: TypeKind,
@@ -48,7 +52,7 @@ impl TypeDescription {
 }
 
 /// Representation of an enum
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Eq, Hash)]
 pub enum EnumVariantRepresentation {
     /// The enum is represented by a string
     ///
@@ -59,7 +63,7 @@ pub enum EnumVariantRepresentation {
 }
 
 /// The kind of enum tagging used by the [`TypeKind::Enum`]
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Eq, Hash)]
 pub enum TypeEnumKind {
     /// An internal tag with the given tag name
     Tagged(&'static str),
@@ -68,7 +72,7 @@ pub enum TypeEnumKind {
 }
 
 /// The specific kind a [`struct@TypeDescription`] represents
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Eq, Hash)]
 pub enum TypeKind {
     /// Type represents a boolean `true`/`false`
     Bool,
@@ -126,7 +130,7 @@ pub enum TypeKind {
 }
 
 /// Whether an integer is a signed integer or an unsigned integer
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Eq, Hash)]
 pub enum Sign {
     /// A signed integer
     Signed,
