@@ -1,6 +1,6 @@
 [package]
 name = "type_description"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MPL-2.0"
 description = "Machine-readable type descriptions"
@@ -15,4 +15,4 @@ members = ["type_description_derive"]
 
 [dependencies]
 serde = { version = "1.0.140", features = ["derive"] }
-type_description_derive = { version = "0.1.0", path = "type_description_derive" }
+type_description_derive = { version = "0.2.0", path = "type_description_derive" }
