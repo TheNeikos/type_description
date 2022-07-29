@@ -172,6 +172,7 @@ jobs:
     if: ${{ success() }}
     needs:
       - check
+      - check-lock-diff-check
       - flake-check
       - license
       - clippy
