@@ -153,39 +153,6 @@ jobs:
       - run: cargo install --locked cargo-outdated
       - run: cargo outdated --root-deps-only --color always
 
-  cross:
-    name: cross
-    needs: check
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target:
-          # TIER 1
-          - aarch64-unknown-linux-gnu
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@1.60.0
-        with:
-          targets: ${{ matrix.target }}
-      - uses: swatinem/rust-cache@v1
-      - run: cargo build --target=${{ matrix.target }}
-
-  cross-test:
-    name: cross-test
-    needs: cross
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target:
-          - aarch64-unknown-linux-gnu
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@1.60.0
-        with:
-          targets: ${{ matrix.target }}
-      - uses: swatinem/rust-cache@v1
-      - run: cargo test --target=${{ matrix.target }}
-
   # We need some "accummulation" job here because bors fails (timeouts) to
   # listen on matrix builds.
   # Hence, we have some kind of dummy here that bors can listen on
