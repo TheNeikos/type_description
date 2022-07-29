@@ -13,11 +13,21 @@ categories = ["config", "rust-patterns", "value-formatting"]
 [workspace]
 members = ["type_description_derive"]
 
+[[bin]]
+name = "describe_types"
+required-features = ["bin"]
+
 [features]
 default = ["render"]
-render = [ "indexmap" ]
+render = ["indexmap"]
+bin = ["clap", "serde_json"]
 
 [dependencies]
+clap = { version = "3.2.15", features = ["derive"], optional = true }
 indexmap = { version = "1.9.1", optional = true }
 serde = { version = "1.0.140", features = ["derive"] }
+serde_json = { version = "1.0.82", optional = true }
 type_description_derive = { version = "0.2.0", path = "type_description_derive" }
+
+[dev-dependencies]
+serde_json = "1.0.82"
