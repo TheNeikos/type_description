@@ -14,5 +14,5 @@ categories = ["config", "rust-patterns", "value-formatting"]
 members = ["type_description_derive"]
 
 [dependencies]
-serde = { version = "1.0.143", features = ["derive"] }
+serde = { version = "1.0.144", features = ["derive"] }
 type_description_derive = { version = "0.2.0", path = "type_description_derive" }
