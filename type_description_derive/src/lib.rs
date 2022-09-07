@@ -117,7 +117,7 @@ impl<'q> ToTokens for TypeQuote<'q> {
                         ::type_description::TypeKind::Struct(
                             vec![
                                 #(
-                                    (#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description())
+                                    ::type_description::StructField::new(#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description())
                                 ),*
                             ]
                         ),
@@ -129,7 +129,7 @@ impl<'q> ToTokens for TypeQuote<'q> {
                 let kind = match kind {
                     TypeEnumKind::Tagged(tag) => {
                         quote! {
-                            ::type_description::TypeEnumKind::Tagged(#tag)
+                            ::type_description::TypeEnumKind::Tagged(::std::borrow::Cow::Borrowed(#tag))
                         }
                     }
                     TypeEnumKind::Untagged => {
@@ -143,11 +143,11 @@ impl<'q> ToTokens for TypeQuote<'q> {
                     let docs = lit_strings_to_string_quoted(&var.docs);
                     match &var.kind {
                         TypeVariantKind::Wrapped(ident, TypeField { ty, .. }) => {
-                            // we ignore the above docs since the outer docs ar ethe important ones
+                            // we ignore the above docs since the outer docs are the important ones
                             // TODO: Emit an error if an inner type in a enum is annotated
                             let ident = ident.to_string();
                             quote!{
-                                (
+                                ::type_description::EnumVariant::new(
                                     #ident,
                                     #docs,
                                     ::type_description::EnumVariantRepresentation::Wrapped(
@@ -169,7 +169,7 @@ impl<'q> ToTokens for TypeQuote<'q> {
                             let tys = fields.iter().map(|f| f.ty);
 
                             quote! {
-                                (
+                                ::type_description::EnumVariant::new(
                                     #ident,
                                     #docs,
                                     ::type_description::EnumVariantRepresentation::Wrapped(
@@ -191,11 +191,11 @@ impl<'q> ToTokens for TypeQuote<'q> {
                         TypeVariantKind::String(ident) => {
                             let ident = ident.to_string();
                             quote!{
-                                (
+                                ::type_description::EnumVariant::new(
                                     #ident,
                                     #docs,
                                     ::type_description::EnumVariantRepresentation::String(
-                                        #ident
+                                        ::std::borrow::Cow::Borrowed(#ident)
                                     )
                                 )
                             }

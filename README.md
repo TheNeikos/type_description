@@ -39,18 +39,18 @@ assert!(std::matches!(desc.kind(), TypeKind::Struct(_)));
 match desc.kind() {
     TypeKind::Struct(v) => {
         let first_field = &v[0];
-        assert_eq!(first_field.0, "addr");
-        assert_eq!(first_field.1, Some("The bind address"));
-        assert_eq!(first_field.2.name(), "String");
-        assert_eq!(first_field.2.doc(), Some("A socket address"));
-        assert_eq!(*first_field.2.kind(), type_description::TypeKind::String);
+        assert_eq!(first_field.name(), "addr");
+        assert_eq!(first_field.doc(), Some("The bind address"));
+        assert_eq!(first_field.kind().name(), "String");
+        assert_eq!(first_field.kind().doc(), Some("A socket address"));
+        assert_eq!(*first_field.kind().kind(), type_description::TypeKind::String);
 
         let second_field = &v[1];
-        assert_eq!(second_field.0, "port");
-        assert_eq!(second_field.1, Some("The Port"));
-        assert_eq!(second_field.2.name(), "Integer");
-        assert_eq!(second_field.2.doc(), Some("An unsigned integer with 16 bits"));
-        assert_eq!(*second_field.2.kind(), type_description::TypeKind::Integer { size: 16, sign: Sign::Unsigned });
+        assert_eq!(second_field.name(), "port");
+        assert_eq!(second_field.doc(), Some("The Port"));
+        assert_eq!(second_field.kind().name(), "Integer");
+        assert_eq!(second_field.kind().doc(), Some("An unsigned integer with 16 bits"));
+        assert_eq!(*second_field.kind().kind(), type_description::TypeKind::Integer { size: 16, sign: Sign::Unsigned });
     }
     _ => unreachable!()
 }
