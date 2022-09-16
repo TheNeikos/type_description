@@ -2,4 +2,6 @@
 
 [Introduction](README.md)
 
-- [Chapter 1](./chapter_1.md)
+- [Generating Markdown]()
+- [Using a CLI step-by-step generator]()
+- [Explain configurations]()
