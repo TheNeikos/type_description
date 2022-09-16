@@ -58,7 +58,7 @@
       in
       rec {
         checks = {
-          inherit type_description;
+          inherit type_description book;
 
           type_description-clippy = craneLib.cargoClippy {
             inherit cargoArtifacts src;
