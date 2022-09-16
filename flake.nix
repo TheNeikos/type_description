@@ -43,10 +43,22 @@
         type_description = craneLib.buildPackage {
           inherit cargoArtifacts src version;
         };
+
+        book = craneLib.mkCargoDerivation {
+          inherit cargoArtifacts src version;
+          cargoVendorDir = null;
+
+          buildPhaseCargoCommand = "mdbook build doc_guide -d $out";
+          checkPhaseCargoCommand = "mdbook test doc_guide -L target/debug/deps";
+
+          pname = "type_description_book";
+
+          nativeBuildInputs = [ pkgs.mdbook ];
+        };
       in
       rec {
         checks = {
-          inherit type_description;
+          inherit type_description book;
 
           type_description-clippy = craneLib.cargoClippy {
             inherit cargoArtifacts src;
@@ -58,6 +70,7 @@
           };
         };
 
+        packages.book = book;
         packages.type_description = type_description;
         packages.default = packages.type_description;
 
@@ -70,6 +83,8 @@
             pkgs.cargo-deny
             pkgs.cargo-expand
             pkgs.cargo-bloat
+
+            pkgs.mdbook
           ];
         };
         devShells.default = devShells.type_description;

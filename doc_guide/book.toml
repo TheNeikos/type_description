@@ -1,0 +1,12 @@
+[book]
+authors = ["Marcel Müller"]
+language = "en"
+multilingual = false
+src = "src"
+title = "How to use the `type_description` crate"
+
+[rust]
+edition = "2021"
+
+[build]
+create-missing = false

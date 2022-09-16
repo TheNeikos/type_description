@@ -4,3 +4,6 @@
 # Direnv 
 .envrc
 .direnv
+
+# nix
+result
