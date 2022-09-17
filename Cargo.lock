@@ -232,7 +232,7 @@ checksum = "b1141d4d61095b28419e22cb0bbf02755f5e54e0526f97f1e3d1d160e60885fb"
 
 [[package]]
 name = "type_description"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "clap",
  "indexmap",
@@ -243,7 +243,7 @@ dependencies = [
 
 [[package]]
 name = "type_description_derive"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
