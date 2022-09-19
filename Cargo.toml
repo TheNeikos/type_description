@@ -23,7 +23,7 @@ render = ["indexmap"]
 bin = ["clap", "serde_json"]
 
 [dependencies]
-clap = { version = "3.2.21", features = ["derive"], optional = true }
+clap = { version = "3.2.22", features = ["derive"], optional = true }
 indexmap = { version = "1.9.1", optional = true }
 serde = { version = "1.0.144", features = ["derive"] }
 serde_json = { version = "1.0.85", optional = true }
