@@ -22,6 +22,7 @@ jobs:
         uses: DeterminateSystems/update-flake-lock@v14
         with:
           pr-title: "Update flake.lock" # Title of PR to be created
+          inputs: nixpkgs
           # pr-labels: |                  # Labels to be set on the PR
           #   dependencies
           #   automated
