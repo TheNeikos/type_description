@@ -11,7 +11,7 @@ jobs:
     name: Build, Test, and Publish Guide
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3.0.2
       - uses: cachix/install-nix-action@v17
         with:
           nix_path: nixpkgs=channel:nixos-unstable
