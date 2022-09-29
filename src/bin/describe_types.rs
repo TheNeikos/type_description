@@ -6,10 +6,10 @@
 
 use std::{error::Error, fmt::Display};
 
-use clap::{ArgEnum, Parser};
+use clap::{Parser, ValueEnum};
 use type_description::{render::render_to_markdown, TypeDescription};
 
-#[derive(Debug, ArgEnum, PartialEq, Clone, Copy)]
+#[derive(Debug, ValueEnum, PartialEq, Clone, Copy)]
 enum OutputFormat {
     Markdown,
 }
