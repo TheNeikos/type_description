@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v3.2.0
+        uses: actions/checkout@v3.3.0
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@master
         with:
@@ -33,7 +33,7 @@ jobs:
   flake-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.2.0
+      - uses: actions/checkout@v3.3.0
       - uses: cachix/install-nix-action@v18
         with:
           nix_path: nixpkgs=channel:nixos-unstable
@@ -47,7 +47,7 @@ jobs:
   license:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.2.0
+      - uses: actions/checkout@v3.3.0
       - name: Check License Lines
         uses: kt3k/license_checker@v1.0.6
 
@@ -65,7 +65,7 @@ jobs:
     continue-on-error: ${{ matrix.checks == 'advisories' }}
 
     steps:
-    - uses: actions/checkout@v3.2.0
+    - uses: actions/checkout@v3.3.0
     - name: cargo-deny
       uses: EmbarkStudios/cargo-deny-action@v1
       with:
@@ -78,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3.2.0
+      - uses: actions/checkout@v3.3.0
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@1.60.0
         with:
@@ -92,7 +92,7 @@ jobs:
     needs: check
 
     steps:
-      - uses: actions/checkout@v3.2.0
+      - uses: actions/checkout@v3.3.0
       - name: cargo-doc
         uses: actions-rs/cargo@v1
         with:
@@ -113,7 +113,7 @@ jobs:
           # - nightly
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v3.2.0
+        uses: actions/checkout@v3.3.0
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@master
         with:
@@ -127,7 +127,7 @@ jobs:
     name: clippy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.2.0
+      - uses: actions/checkout@v3.3.0
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@1.60.0
         with:
@@ -145,7 +145,7 @@ jobs:
     continue-on-error: true
 
     steps:
-      - uses: actions/checkout@v3.2.0
+      - uses: actions/checkout@v3.3.0
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@1.60.0
       - uses: swatinem/rust-cache@v2
