@@ -1,1 +1,1 @@
-/nix/store/0220cvn48jpzhbvdlzjvmaili1sfsbqx-type_description-deps-0.3.0/target/release/deps/type_description-dfe53e9a57184ada.d
+/nix/store/a4rj5cbm3w89l2bklvcpil71jfrn814i-type_description-deps-0.3.0/target/release/deps/type_description-dfe53e9a57184ada.d
