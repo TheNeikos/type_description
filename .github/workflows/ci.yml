@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - 1.60.0
+          - 1.65.0
           - stable
           - beta
           # - nightly
@@ -80,7 +80,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Install toolchain
-        uses: dtolnay/rust-toolchain@1.60.0
+        uses: dtolnay/rust-toolchain@1.65.0
         with:
           components: rustfmt
       - run: cargo fmt --all -- --check
@@ -107,7 +107,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - 1.60.0
+          - 1.65.0
           - stable
           - beta
           # - nightly
@@ -129,7 +129,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Install toolchain
-        uses: dtolnay/rust-toolchain@1.60.0
+        uses: dtolnay/rust-toolchain@1.65.0
         with:
           components: clippy
       - uses: swatinem/rust-cache@v2
@@ -147,7 +147,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Install toolchain
-        uses: dtolnay/rust-toolchain@1.60.0
+        uses: dtolnay/rust-toolchain@1.65.0
       - uses: swatinem/rust-cache@v2
       - run: cargo install --locked cargo-outdated
       - run: cargo outdated --root-deps-only --color always
