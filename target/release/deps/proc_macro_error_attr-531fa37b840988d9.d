@@ -1,0 +1,1 @@
+/nix/store/0220cvn48jpzhbvdlzjvmaili1sfsbqx-type_description-deps-0.3.0/target/release/deps/proc_macro_error_attr-531fa37b840988d9.d

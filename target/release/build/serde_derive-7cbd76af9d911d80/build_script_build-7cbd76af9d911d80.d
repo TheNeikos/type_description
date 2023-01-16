@@ -1,0 +1,1 @@
+/nix/store/0220cvn48jpzhbvdlzjvmaili1sfsbqx-type_description-deps-0.3.0/target/release/build/serde_derive-7cbd76af9d911d80/build_script_build-7cbd76af9d911d80.d

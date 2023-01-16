@@ -1,0 +1,1 @@
+/nix/store/0220cvn48jpzhbvdlzjvmaili1sfsbqx-type_description-deps-0.3.0/target/release/build/proc-macro-error-66c9e8e7c4c06c52/build_script_build-66c9e8e7c4c06c52.d
