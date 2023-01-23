@@ -1,1 +1,0 @@
-/nix/store/a4rj5cbm3w89l2bklvcpil71jfrn814i-type_description-deps-0.3.0/target/release/deps/serde_derive-d8c24c709e1966b1.d

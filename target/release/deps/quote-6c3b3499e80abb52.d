@@ -1,1 +1,0 @@
-/nix/store/a4rj5cbm3w89l2bklvcpil71jfrn814i-type_description-deps-0.3.0/target/release/deps/quote-6c3b3499e80abb52.d

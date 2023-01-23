@@ -1,0 +1,1 @@
+/nix/store/lpgp3vyhy1m65dampjsskymy65lx0xck-type_description-deps-0.3.0/target/release/deps/describe_types-4fb88708c3194489.d

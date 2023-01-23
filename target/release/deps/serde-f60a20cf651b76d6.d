@@ -1,0 +1,1 @@
+/nix/store/lpgp3vyhy1m65dampjsskymy65lx0xck-type_description-deps-0.3.0/target/release/deps/serde-f60a20cf651b76d6.d

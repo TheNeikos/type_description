@@ -1,0 +1,1 @@
+/nix/store/lpgp3vyhy1m65dampjsskymy65lx0xck-type_description-deps-0.3.0/target/release/deps/proc_macro_error_attr-528340ea943e8c9d.d
