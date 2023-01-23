@@ -50,6 +50,8 @@
           buildPhaseCargoCommand = "mdbook build doc_guide -d $out";
           checkPhaseCargoCommand = "mdbook test doc_guide -L target/debug/deps";
 
+          postFixup = "rm -rf $out/target";
+
           pname = "type_description_book";
 
           nativeBuildInputs = [ pkgs.mdbook ];
