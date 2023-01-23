@@ -76,7 +76,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">1.</strong> Generating Markdown</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Using a CLI step-by-step generator</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">3.</strong> Explain configurations</div></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="generating_markdown.html"><strong aria-hidden="true">1.</strong> Generating Markdown</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Using a CLI step-by-step generator</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">3.</strong> Explain configurations</div></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -279,6 +279,44 @@ constituents as well as the documentation you have provided.</p>
 <p><em>Array Elements of String</em></p>
 </blockquote>
 <p>If this sounds intruiging, read on and find out how it can be used!</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="generating-markdown"><a class="header" href="#generating-markdown">Generating Markdown</a></h1>
+<p>Depending on your case you can interact with <code>TypeDescription</code>s in multiple ways.</p>
+<p>If you are given a JSON formatted type description file, then you can use the CLI for further processing.
+(This may be the case if you are using someone else's project).</p>
+<p>If you have some Rust types and want to generate markdown directly from their
+<code>TypeDescription</code> then you might be best served with the library.</p>
+<h2 id="using-the-cli"><a class="header" href="#using-the-cli">Using the CLI</a></h2>
+<p>The preferred way of interacting with the CLI is to use the <code>type_description</code> binary.</p>
+<p>It can be invoked in the following ways:</p>
+<ul>
+<li>With the nix package manager (flakes enabled): <code>nix run github:TheNeikos/type_description</code></li>
+<li>With cargo: <code>cargo install type_description</code></li>
+<li>Directly from source: <code>git clone https://github.com/TheNeikos/type_description &amp;&amp; cd type_description &amp;&amp; cargo run -F bin</code></li>
+</ul>
+<p>Either way you have installed it. You can now generate markdown from it by sending it to standard input.</p>
+<p>E.g.:</p>
+<ul>
+<li>Using nix: <code>cat &lt;your description file&gt; | nix run github:TheNeikos/type_description</code></li>
+<li>After installing it: <code>curl example.com/some_type_description | type_description</code></li>
+<li>Building from source: <code>curl example.com/some_type_description | cargo run -F bin</code></li>
+</ul>
+<h2 id="using-the-library"><a class="header" href="#using-the-library">Using the library</a></h2>
+<p>Rendering a <code>TypeDescription</code> to markdown can be done with the
+<a href="https://docs.rs/type_description/latest/type_description/render/fn.render_to_markdown.html"><code>type_description::render::render_to_markdown</code></a>
+method.</p>
+<pre><pre class="playground"><code class="language-rust edition2021"><span class="boring">extern crate type_description;
+</span><span class="boring">fn main() {
+</span>use type_description::AsTypeDescription;
+
+let ty_desc = std::collections::HashMap::&lt;String, f64&gt;::as_type_description();
+
+let markdown: String = type_description::render::render_to_markdown(&amp;ty_desc).expect(&quot;Could not render to markdown&quot;);
+
+println!(&quot;{}&quot;, markdown);
+<span class="boring">}
+</span></code></pre></pre>
+<p>You can then use a markdown to HTML processor to generate HTML, or maybe print
+it to the terminal with the <a href="https://docs.rs/termimad"><code>termimad</code></a> crate.</p>
 
                     </main>
 

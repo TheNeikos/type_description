@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - How to use the &#x60;type_description&#x60; crate</title>
+        <title>Generating Markdown - How to use the &#x60;type_description&#x60; crate</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html" class="active">Introduction</a></li><li class="chapter-item expanded "><a href="generating_markdown.html"><strong aria-hidden="true">1.</strong> Generating Markdown</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Using a CLI step-by-step generator</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">3.</strong> Explain configurations</div></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="generating_markdown.html" class="active"><strong aria-hidden="true">1.</strong> Generating Markdown</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Using a CLI step-by-step generator</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">3.</strong> Explain configurations</div></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -134,157 +134,51 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p>The <code>type_description</code> crate is the basic block to allow for discovery of
-configuration options in your Rust projects.</p>
-<p>It allows for self-describing types in your project, and an easy way to export
-them. 
-This description can then be manipulated like any other data, allow for
-processing into for example Markdown or a questionnaire.</p>
-<p>An example would be the following:</p>
-<pre><pre class="playground"><code class="language-rust edition2021"><span class="boring">//
-</span><span class="boring">//   This Source Code Form is subject to the terms of the Mozilla Public
-</span><span class="boring">//   License, v. 2.0. If a copy of the MPL was not distributed with this
-</span><span class="boring">//   file, You can obtain one at http://mozilla.org/MPL/2.0/.
-</span><span class="boring">//
-</span><span class="boring">extern crate type_description;
-</span><span class="boring">extern crate serde_json;
-</span><span class="boring">
-</span><span class="boring">use type_description::{AsTypeDescription, TypeDescription};
-</span><span class="boring">
-</span><span class="boring">fn main() {
-</span><span class="boring">
-</span><span class="boring">
-</span>#[derive(TypeDescription)]
-struct MyConfiguration {
-    /// The name of this configuration
-    name: String,
-
-    /// List of actions this config can take
-    action: Vec&lt;String&gt;,
-}
-<span class="boring">
-</span><span class="boring">assert_eq!(serde_json::to_string_pretty(&amp;MyConfiguration::as_type_description()).unwrap(), r#&quot;
-</span><span class="boring">{
-</span><span class="boring">  &quot;name&quot;: &quot;MyConfiguration&quot;,
-</span><span class="boring">  &quot;kind&quot;: {
-</span><span class="boring">    &quot;Struct&quot;: [
-</span><span class="boring">      {
-</span><span class="boring">        &quot;name&quot;: &quot;name&quot;,
-</span><span class="boring">        &quot;doc&quot;: &quot;The name of this configuration&quot;,
-</span><span class="boring">        &quot;kind&quot;: {
-</span><span class="boring">          &quot;name&quot;: &quot;String&quot;,
-</span><span class="boring">          &quot;kind&quot;: &quot;String&quot;,
-</span><span class="boring">          &quot;doc&quot;: &quot;An UTF-8 string&quot;
-</span><span class="boring">        }
-</span><span class="boring">      },
-</span><span class="boring">      {
-</span><span class="boring">        &quot;name&quot;: &quot;action&quot;,
-</span><span class="boring">        &quot;doc&quot;: &quot;List of actions this config can take&quot;,
-</span><span class="boring">        &quot;kind&quot;: {
-</span><span class="boring">          &quot;name&quot;: &quot;Array of 'String's&quot;,
-</span><span class="boring">          &quot;kind&quot;: {
-</span><span class="boring">            &quot;Array&quot;: {
-</span><span class="boring">              &quot;name&quot;: &quot;String&quot;,
-</span><span class="boring">              &quot;kind&quot;: &quot;String&quot;,
-</span><span class="boring">              &quot;doc&quot;: &quot;An UTF-8 string&quot;
-</span><span class="boring">            }
-</span><span class="boring">          },
-</span><span class="boring">          &quot;doc&quot;: null
-</span><span class="boring">        }
-</span><span class="boring">      }
-</span><span class="boring">    ]
-</span><span class="boring">  },
-</span><span class="boring">  &quot;doc&quot;: null
-</span><span class="boring">}
-</span><span class="boring">&quot;#.trim())
-</span><span class="boring">
-</span><span class="boring">}
-</span></code></pre></pre>
-<p>This would then output a datastructure (if rendered as JSON) like this:</p>
-<pre><pre class="playground"><code class="language-rust edition2021"><span class="boring">//
-</span><span class="boring">//   This Source Code Form is subject to the terms of the Mozilla Public
-</span><span class="boring">//   License, v. 2.0. If a copy of the MPL was not distributed with this
-</span><span class="boring">//   file, You can obtain one at http://mozilla.org/MPL/2.0/.
-</span><span class="boring">//
-</span><span class="boring">extern crate type_description;
-</span><span class="boring">extern crate serde_json;
-</span><span class="boring">
-</span><span class="boring">use type_description::{AsTypeDescription, TypeDescription};
-</span><span class="boring">
-</span><span class="boring">fn main() {
-</span><span class="boring">
-</span><span class="boring">
-</span><span class="boring">#[derive(TypeDescription)]
-</span><span class="boring">struct MyConfiguration {
-</span><span class="boring">    /// The name of this configuration
-</span><span class="boring">    name: String,
-</span><span class="boring">
-</span><span class="boring">    /// List of actions this config can take
-</span><span class="boring">    action: Vec&lt;String&gt;,
-</span><span class="boring">}
-</span><span class="boring">
-</span><span class="boring">assert_eq!(serde_json::to_string_pretty(&amp;MyConfiguration::as_type_description()).unwrap(), r#&quot;
-</span>{
-  &quot;name&quot;: &quot;MyConfiguration&quot;,
-  &quot;kind&quot;: {
-    &quot;Struct&quot;: [
-      {
-        &quot;name&quot;: &quot;name&quot;,
-        &quot;doc&quot;: &quot;The name of this configuration&quot;,
-        &quot;kind&quot;: {
-          &quot;name&quot;: &quot;String&quot;,
-          &quot;kind&quot;: &quot;String&quot;,
-          &quot;doc&quot;: &quot;An UTF-8 string&quot;
-        }
-      },
-      {
-        &quot;name&quot;: &quot;action&quot;,
-        &quot;doc&quot;: &quot;List of actions this config can take&quot;,
-        &quot;kind&quot;: {
-          &quot;name&quot;: &quot;Array of 'String's&quot;,
-          &quot;kind&quot;: {
-            &quot;Array&quot;: {
-              &quot;name&quot;: &quot;String&quot;,
-              &quot;kind&quot;: &quot;String&quot;,
-              &quot;doc&quot;: &quot;An UTF-8 string&quot;
-            }
-          },
-          &quot;doc&quot;: null
-        }
-      }
-    ]
-  },
-  &quot;doc&quot;: null
-}
-<span class="boring">&quot;#.trim())
-</span><span class="boring">
-</span><span class="boring">}
-</span></code></pre></pre>
-<p>As you can see, not only is the struct itself described, but also all of its
-constituents as well as the documentation you have provided.</p>
-<p>If you want to, you could use the binary provided by the <code>type_description</code> crate to transform it into markdown!</p>
-<p>This would output something akin to:</p>
-<blockquote>
-<h1 id="myconfiguration"><a class="header" href="#myconfiguration">MyConfiguration</a></h1>
-<p><strong>Fields:</strong></p>
+                        <h1 id="generating-markdown"><a class="header" href="#generating-markdown">Generating Markdown</a></h1>
+<p>Depending on your case you can interact with <code>TypeDescription</code>s in multiple ways.</p>
+<p>If you are given a JSON formatted type description file, then you can use the CLI for further processing.
+(This may be the case if you are using someone else's project).</p>
+<p>If you have some Rust types and want to generate markdown directly from their
+<code>TypeDescription</code> then you might be best served with the library.</p>
+<h2 id="using-the-cli"><a class="header" href="#using-the-cli">Using the CLI</a></h2>
+<p>The preferred way of interacting with the CLI is to use the <code>type_description</code> binary.</p>
+<p>It can be invoked in the following ways:</p>
 <ul>
-<li><code>name</code> (String): The name of this configuration</li>
-<li><code>action</code> (Array of 'String's): List of actions this config can take</li>
+<li>With the nix package manager (flakes enabled): <code>nix run github:TheNeikos/type_description</code></li>
+<li>With cargo: <code>cargo install type_description</code></li>
+<li>Directly from source: <code>git clone https://github.com/TheNeikos/type_description &amp;&amp; cd type_description &amp;&amp; cargo run -F bin</code></li>
 </ul>
-<h1 id="string"><a class="header" href="#string">String</a></h1>
-<p>An UTF-8 string</p>
-<h1 id="array-of-strings"><a class="header" href="#array-of-strings">Array of 'String's</a></h1>
-<p><em>Array Elements of String</em></p>
-</blockquote>
-<p>If this sounds intruiging, read on and find out how it can be used!</p>
+<p>Either way you have installed it. You can now generate markdown from it by sending it to standard input.</p>
+<p>E.g.:</p>
+<ul>
+<li>Using nix: <code>cat &lt;your description file&gt; | nix run github:TheNeikos/type_description</code></li>
+<li>After installing it: <code>curl example.com/some_type_description | type_description</code></li>
+<li>Building from source: <code>curl example.com/some_type_description | cargo run -F bin</code></li>
+</ul>
+<h2 id="using-the-library"><a class="header" href="#using-the-library">Using the library</a></h2>
+<p>Rendering a <code>TypeDescription</code> to markdown can be done with the
+<a href="https://docs.rs/type_description/latest/type_description/render/fn.render_to_markdown.html"><code>type_description::render::render_to_markdown</code></a>
+method.</p>
+<pre><pre class="playground"><code class="language-rust edition2021"><span class="boring">extern crate type_description;
+</span><span class="boring">fn main() {
+</span>use type_description::AsTypeDescription;
+
+let ty_desc = std::collections::HashMap::&lt;String, f64&gt;::as_type_description();
+
+let markdown: String = type_description::render::render_to_markdown(&amp;ty_desc).expect(&quot;Could not render to markdown&quot;);
+
+println!(&quot;{}&quot;, markdown);
+<span class="boring">}
+</span></code></pre></pre>
+<p>You can then use a markdown to HTML processor to generate HTML, or maybe print
+it to the terminal with the <a href="https://docs.rs/termimad"><code>termimad</code></a> crate.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="next" href="generating_markdown.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
+                            <a rel="prev" href="index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
                             </a>
                         <div style="clear: both"></div>
                     </nav>
@@ -292,8 +186,8 @@ constituents as well as the documentation you have provided.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="next" href="generating_markdown.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
+                    <a rel="prev" href="index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
                     </a>
             </nav>
 

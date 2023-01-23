@@ -1,1 +1,1 @@
-/nix/store/lpgp3vyhy1m65dampjsskymy65lx0xck-type_description-deps-0.3.0/target/release/deps/proc_macro2-6e440dfbc0c948dc.d
+/nix/store/s8ap83952cx4pskvnrrybarl0ri8bkx5-type_description-deps-0.3.0/target/release/deps/proc_macro2-6e440dfbc0c948dc.d

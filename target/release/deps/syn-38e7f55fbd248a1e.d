@@ -1,1 +1,1 @@
-/nix/store/lpgp3vyhy1m65dampjsskymy65lx0xck-type_description-deps-0.3.0/target/release/deps/syn-38e7f55fbd248a1e.d
+/nix/store/s8ap83952cx4pskvnrrybarl0ri8bkx5-type_description-deps-0.3.0/target/release/deps/syn-38e7f55fbd248a1e.d
