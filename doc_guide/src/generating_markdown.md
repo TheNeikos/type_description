@@ -2,7 +2,7 @@
 
 Depending on your case you can interact with `TypeDescription`s in multiple ways.
 
-If you are given a JSON formatted type description file, then you should use the CLI for further processing.
+If you are given a JSON formatted type description file, then you can use the CLI for further processing.
 (This may be the case if you are using someone else's project).
 
 If you have some Rust types and want to generate markdown directly from their
@@ -22,7 +22,7 @@ Either way you have installed it. You can now generate markdown from it by sendi
 
 E.g.:
 
-- Using nix: `cat desc.rtd | nix run github:TheNeikos/type_description`
+- Using nix: `cat <your description file> | nix run github:TheNeikos/type_description`
 - After installing it: `curl example.com/some_type_description | type_description`
 - Building from source: `curl example.com/some_type_description | cargo run -F bin`
 
