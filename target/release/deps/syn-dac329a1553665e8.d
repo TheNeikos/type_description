@@ -1,1 +1,0 @@
-/nix/store/s8ap83952cx4pskvnrrybarl0ri8bkx5-type_description-deps-0.3.0/target/release/deps/syn-dac329a1553665e8.d
