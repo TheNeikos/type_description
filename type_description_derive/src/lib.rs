@@ -254,65 +254,60 @@ pub fn derive_type_description(input: TS) -> TS {
         },
         syn::Data::Enum(data) => {
             let enum_kind: TypeEnumKind = {
-                let potential_kind = input
+                let potential_kinds = input
                     .attrs
                     .iter()
-                    .find(|attr| attr.path.is_ident("description"))
-                    .unwrap_or_else(|| {
-                        abort!(ident, "Enums need to specify what kind of tagging they use"; 
-                               help = "Use #[description(untagged)] for untagged enums, and #[description(tag = \"type\")] for internally tagged variants. Other kinds are not supported.")
-                    });
+                    .filter(|attr| attr.path.is_ident("description"))
+                    .collect::<Vec<_>>();
 
-                macro_rules! abort_parse_enum_kind {
-                    ($kind:expr) => {
-                            abort!($kind, "Could not parse enum tag kind.";
-                                   help = "Accepted kinds are #[description(untagged)] and #[description(tag = \"type\")].")
+                let error_no_kind = || abort!(ident, "Enums need to specify what kind of tagging they use"; help = "Use #[description(untagged)] for untagged enums, and #[description(tag = \"type\")] for internally tagged variants. Other kinds are not supported.");
+
+                if potential_kinds.is_empty() {
+                    error_no_kind()
+                }
+
+                let mut found_enum_kind = None;
+
+                for potential_kind in potential_kinds {
+                    match potential_kind
+                        .parse_meta()
+                        .expect_or_abort("Could not parse #[description] meta attribute.")
+                    {
+                        syn::Meta::List(kind) => {
+                            if kind.nested.len() != 1 {
+                                continue;
+                            }
+
+                            match kind.nested.first() {
+                                Some(NestedMeta::Meta(Meta::NameValue(MetaNameValue {
+                                    path,
+                                    lit: Lit::Str(lit_str),
+                                    ..
+                                }))) => {
+                                    if path.is_ident("tag") {
+                                        found_enum_kind =
+                                            Some(TypeEnumKind::Tagged(lit_str.clone()));
+                                    }
+                                }
+                                Some(NestedMeta::Meta(Meta::Path(path))) => {
+                                    if path.is_ident("untagged") {
+                                        found_enum_kind = Some(TypeEnumKind::Untagged);
+                                    }
+                                }
+                                _ => {
+                                    continue;
+                                }
+                            }
+                        }
+                        _ => continue,
                     }
                 }
 
-                match potential_kind
-                    .parse_meta()
-                    .expect_or_abort("Could not parse #[description] meta attribute.")
-                {
-                    syn::Meta::Path(kind) => {
-                        abort_parse_enum_kind!(kind)
-                    }
-                    syn::Meta::List(kind) => {
-                        if kind.nested.len() != 1 {
-                            abort_parse_enum_kind!(kind)
-                        }
-
-                        match kind.nested.first() {
-                            Some(NestedMeta::Meta(Meta::NameValue(MetaNameValue {
-                                path,
-                                lit: Lit::Str(lit_str),
-                                ..
-                            }))) => {
-                                if path.is_ident("tag") {
-                                    TypeEnumKind::Tagged(lit_str.clone())
-                                } else {
-                                    abort_parse_enum_kind!(kind)
-                                }
-                            }
-                            Some(NestedMeta::Meta(Meta::Path(path))) => {
-                                if path.is_ident("untagged") {
-                                    TypeEnumKind::Untagged
-                                } else {
-                                    abort_parse_enum_kind!(path)
-                                }
-                            }
-                            _ => {
-                                println!("Oh no!");
-                                abort_parse_enum_kind!(kind)
-                            }
-                        }
-                    }
-                    syn::Meta::NameValue(kind) => abort!(
-                        kind,
-                        "The #[description] attribute cannot be used as a name-value attribute.";
-                        help = "Maybe you meant #[description(tag = \"type\")] to describe that this enum has an internal tag?"
-                    ),
+                if found_enum_kind.is_none() {
+                    error_no_kind()
                 }
+
+                found_enum_kind.unwrap()
             };
 
             let variants = data
