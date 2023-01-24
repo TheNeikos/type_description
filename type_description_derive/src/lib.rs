@@ -15,7 +15,7 @@ use syn::{
 
 #[derive(Debug)]
 struct TypeField<'q> {
-    ident: &'q Ident,
+    ident: Ident,
     ty: &'q Type,
     docs: Option<Vec<LitStr>>,
 }
@@ -80,6 +80,48 @@ fn extract_docs_from_attributes<'a>(
             }
             None
         })
+        .collect::<Vec<_>>();
+
+    if attrs.is_empty() {
+        None
+    } else {
+        Some(attrs)
+    }
+}
+
+#[derive(Debug)]
+enum SerdeFieldAttribute {
+    Rename(LitStr),
+}
+
+fn extra_serde_field_attributes<'a>(
+    attrs: impl Iterator<Item = &'a Attribute>,
+) -> Option<Vec<SerdeFieldAttribute>> {
+    let attrs = attrs
+        .filter(|attr| attr.path.is_ident("serde"))
+        .map(|attr| {
+            if let Ok(Meta::List(list)) = attr.parse_meta() {
+                list.nested
+                    .into_iter()
+                    .filter_map(|meta| match meta {
+                        NestedMeta::Lit(_) => None,
+                        NestedMeta::Meta(meta) => {
+                            if let Meta::NameValue(meta) = meta {
+                                if meta.path.is_ident("rename") {
+                                    if let Lit::Str(litstr) = meta.lit {
+                                        return Some(SerdeFieldAttribute::Rename(litstr));
+                                    }
+                                }
+                            }
+                            None
+                        }
+                    })
+                    .collect::<Vec<_>>()
+            } else {
+                vec![]
+            }
+        })
+        .flatten()
         .collect::<Vec<_>>();
 
     if attrs.is_empty() {
@@ -225,11 +267,38 @@ pub fn derive_type_description(input: TS) -> TS {
 
     let ident = &input.ident;
 
-    let container_attributes = input
+    let desc_container_attributes = input
         .attrs
         .iter()
         .filter(|attr| attr.path.is_ident("description"))
         .collect::<Vec<_>>();
+
+    let use_serde = desc_container_attributes
+        .iter()
+        .filter(|attr| attr.path.is_ident("description"))
+        .find(|attr| match attr.parse_meta() {
+            Err(_) => false,
+            Ok(meta) => match meta {
+                syn::Meta::List(kind) => {
+                    if kind.nested.len() != 1 {
+                        return false;
+                    }
+
+                    match kind.nested.first() {
+                        Some(NestedMeta::Meta(Meta::Path(path))) => {
+                            if path.is_ident("use_serde") {
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                        _ => false,
+                    }
+                }
+                _ => false,
+            },
+        })
+        .is_some();
 
     let type_desc_kind: TypeQuoteKind = match &input.data {
         syn::Data::Struct(data) => match &data.fields {
@@ -237,10 +306,36 @@ pub fn derive_type_description(input: TS) -> TS {
                 fields
                     .named
                     .iter()
-                    .map(|f| TypeField {
-                        ident: f.ident.as_ref().unwrap(),
-                        ty: &f.ty,
-                        docs: extract_docs_from_attributes(f.attrs.iter()),
+                    .map(|f| {
+                        (
+                            f,
+                            TypeField {
+                                ident: f.ident.as_ref().cloned().unwrap(),
+                                ty: &f.ty,
+                                docs: extract_docs_from_attributes(f.attrs.iter()),
+                            },
+                        )
+                    })
+                    .map(|(field, mut type_field)| {
+                        if use_serde {
+                            let serde_field_attrs =
+                                extra_serde_field_attributes(field.attrs.iter());
+
+                            if let Some(serde_field_attrs) = serde_field_attrs {
+                                for attr in serde_field_attrs {
+                                    match attr {
+                                        SerdeFieldAttribute::Rename(litstr) => {
+                                            type_field.ident =
+                                                Ident::new(&litstr.value(), litstr.span());
+                                        }
+                                    }
+                                }
+                            }
+
+                            type_field
+                        } else {
+                            type_field
+                        }
                     })
                     .collect(),
             ),
@@ -262,13 +357,13 @@ pub fn derive_type_description(input: TS) -> TS {
             let enum_kind: TypeEnumKind = {
                 let error_no_kind = || abort!(ident, "Enums need to specify what kind of tagging they use"; help = "Use #[description(untagged)] for untagged enums, and #[description(tag = \"type\")] for internally tagged variants. Other kinds are not supported.");
 
-                if container_attributes.is_empty() {
+                if desc_container_attributes.is_empty() {
                     error_no_kind()
                 }
 
                 let mut found_enum_kind = None;
 
-                for potential_kind in &container_attributes {
+                for potential_kind in &desc_container_attributes {
                     match potential_kind
                         .parse_meta()
                         .expect_or_abort("Could not parse #[description] meta attribute.")
@@ -321,7 +416,7 @@ pub fn derive_type_description(input: TS) -> TS {
                                 .named
                                 .iter()
                                 .map(|f| TypeField {
-                                    ident: f.ident.as_ref().unwrap(),
+                                    ident: f.ident.as_ref().cloned().unwrap(),
                                     ty: &f.ty,
                                     docs: extract_docs_from_attributes(f.attrs.iter()),
                                 })
@@ -337,7 +432,7 @@ pub fn derive_type_description(input: TS) -> TS {
                             TypeVariantKind::Wrapped(
                                 &var.ident,
                                 TypeField {
-                                    ident: &var.ident,
+                                    ident: var.ident.clone(),
                                     ty: &fields.unnamed.first().unwrap().ty,
                                     docs: extract_docs_from_attributes(var.attrs.iter()),
                                 },
