@@ -266,7 +266,7 @@ pub fn derive_type_description(input: TS) -> TS {
                 macro_rules! abort_parse_enum_kind {
                     ($kind:expr) => {
                             abort!($kind, "Could not parse enum tag kind.";
-                                   help = "Accepted kinds are #[description(untagged)] and #[description(tag = \"type\')].")
+                                   help = "Accepted kinds are #[description(untagged)] and #[description(tag = \"type\")].")
                     }
                 }
 
