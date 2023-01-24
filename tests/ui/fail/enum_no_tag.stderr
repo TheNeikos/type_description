@@ -1,0 +1,8 @@
+error: Enums need to specify what kind of tagging they use
+
+         = help: Use #[description(untagged)] for untagged enums, and #[description(tag = "type")] for internally tagged variants. Other kinds are not supported.
+
+  --> tests/ui/fail/enum_no_tag.rs:12:6
+   |
+12 | enum Door {
+   |      ^^^^
