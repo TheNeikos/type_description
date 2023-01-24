@@ -11,7 +11,7 @@ categories = ["config", "rust-patterns", "value-formatting"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
-members = ["type_description_derive"]
+members = ["type_description_derive", "online_description_generator"]
 
 [[bin]]
 name = "describe_types"
