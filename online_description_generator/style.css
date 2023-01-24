@@ -1,0 +1,18 @@
+.inputcontainer {
+    margin: 1em;
+    max-width: 45%;
+}
+
+.outputcontainer {
+    margin: 1em;
+    max-width: 45%;
+}
+
+.body {
+    display: flex;
+}
+
+.container {
+    flex-direction: row;
+}
+
