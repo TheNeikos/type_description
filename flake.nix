@@ -86,6 +86,7 @@
             pkgs.cargo-bloat
 
             pkgs.mdbook
+            pkgs.trunk
           ];
         };
         devShells.default = devShells.type_description;
