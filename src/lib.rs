@@ -81,15 +81,22 @@ pub struct StructField {
     name: Cow<'static, str>,
     doc: Option<Cow<'static, str>>,
     kind: TypeDescription,
+    optional: bool,
 }
 
 impl StructField {
     /// Create a new [`StructField`]
-    pub fn new(name: &'static str, doc: Option<&'static str>, kind: TypeDescription) -> Self {
+    pub fn new(
+        name: &'static str,
+        doc: Option<&'static str>,
+        kind: TypeDescription,
+        optional: bool,
+    ) -> Self {
         Self {
             name: Cow::Borrowed(name),
             doc: doc.map(Cow::Borrowed),
             kind,
+            optional,
         }
     }
 
@@ -106,6 +113,11 @@ impl StructField {
     /// Get the field's kind.
     pub fn kind(&self) -> &TypeDescription {
         &self.kind
+    }
+
+    /// Whether this field is optional
+    pub fn optional(&self) -> bool {
+        self.optional
     }
 }
 

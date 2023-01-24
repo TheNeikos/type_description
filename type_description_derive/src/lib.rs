@@ -18,6 +18,7 @@ struct TypeField<'q> {
     ident: Ident,
     ty: &'q Type,
     docs: Option<Vec<LitStr>>,
+    optional: bool,
 }
 
 #[derive(Debug)]
@@ -92,6 +93,7 @@ fn extract_docs_from_attributes<'a>(
 #[derive(Debug)]
 enum SerdeFieldAttribute {
     Rename(LitStr),
+    HasDefault,
 }
 
 fn extra_serde_field_attributes<'a>(
@@ -99,27 +101,33 @@ fn extra_serde_field_attributes<'a>(
 ) -> Option<Vec<SerdeFieldAttribute>> {
     let attrs = attrs
         .filter(|attr| attr.path.is_ident("serde"))
-        .map(|attr| {
-            if let Ok(Meta::List(list)) = attr.parse_meta() {
-                list.nested
-                    .into_iter()
-                    .filter_map(|meta| match meta {
-                        NestedMeta::Lit(_) => None,
-                        NestedMeta::Meta(meta) => {
-                            if let Meta::NameValue(meta) = meta {
+        .map(|attr| match attr.parse_meta() {
+            Ok(Meta::List(list)) => list
+                .nested
+                .into_iter()
+                .filter_map(|meta| match meta {
+                    NestedMeta::Lit(_) => None,
+                    NestedMeta::Meta(meta) => {
+                        match meta {
+                            Meta::NameValue(meta) => {
                                 if meta.path.is_ident("rename") {
                                     if let Lit::Str(litstr) = meta.lit {
                                         return Some(SerdeFieldAttribute::Rename(litstr));
                                     }
                                 }
                             }
-                            None
+                            Meta::Path(path) => {
+                                if path.is_ident("default") {
+                                    return Some(SerdeFieldAttribute::HasDefault);
+                                }
+                            }
+                            _ => {}
                         }
-                    })
-                    .collect::<Vec<_>>()
-            } else {
-                vec![]
-            }
+                        None
+                    }
+                })
+                .collect::<Vec<_>>(),
+            _ => vec![],
         })
         .flatten()
         .collect::<Vec<_>>();
@@ -152,6 +160,7 @@ impl<'q> ToTokens for TypeQuote<'q> {
                 let ident = fields.iter().map(|f| f.ident.to_string());
                 let ty = fields.iter().map(|f| f.ty);
                 let docs = fields.iter().map(|f| lit_strings_to_string_quoted(&f.docs));
+                let optional = fields.iter().map(|f| f.optional);
 
                 quote! {
                     ::type_description::TypeDescription::new(
@@ -159,7 +168,7 @@ impl<'q> ToTokens for TypeQuote<'q> {
                         ::type_description::TypeKind::Struct(
                             vec![
                                 #(
-                                    ::type_description::StructField::new(#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description())
+                                    ::type_description::StructField::new(#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description(), #optional)
                                 ),*
                             ]
                         ),
@@ -313,6 +322,7 @@ pub fn derive_type_description(input: TS) -> TS {
                                 ident: f.ident.as_ref().cloned().unwrap(),
                                 ty: &f.ty,
                                 docs: extract_docs_from_attributes(f.attrs.iter()),
+                                optional: false,
                             },
                         )
                     })
@@ -327,6 +337,9 @@ pub fn derive_type_description(input: TS) -> TS {
                                         SerdeFieldAttribute::Rename(litstr) => {
                                             type_field.ident =
                                                 Ident::new(&litstr.value(), litstr.span());
+                                        }
+                                        SerdeFieldAttribute::HasDefault => {
+                                            type_field.optional = true;
                                         }
                                     }
                                 }
@@ -419,6 +432,7 @@ pub fn derive_type_description(input: TS) -> TS {
                                     ident: f.ident.as_ref().cloned().unwrap(),
                                     ty: &f.ty,
                                     docs: extract_docs_from_attributes(f.attrs.iter()),
+                                    optional: false,
                                 })
                                 .collect(),
                         ),
@@ -435,6 +449,7 @@ pub fn derive_type_description(input: TS) -> TS {
                                     ident: var.ident.clone(),
                                     ty: &fields.unnamed.first().unwrap().ty,
                                     docs: extract_docs_from_attributes(var.attrs.iter()),
+                                    optional: false,
                                 },
                             )
                         }
