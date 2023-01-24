@@ -225,6 +225,12 @@ pub fn derive_type_description(input: TS) -> TS {
 
     let ident = &input.ident;
 
+    let container_attributes = input
+        .attrs
+        .iter()
+        .filter(|attr| attr.path.is_ident("description"))
+        .collect::<Vec<_>>();
+
     let type_desc_kind: TypeQuoteKind = match &input.data {
         syn::Data::Struct(data) => match &data.fields {
             syn::Fields::Named(fields) => TypeQuoteKind::Struct(
@@ -254,21 +260,15 @@ pub fn derive_type_description(input: TS) -> TS {
         },
         syn::Data::Enum(data) => {
             let enum_kind: TypeEnumKind = {
-                let potential_kinds = input
-                    .attrs
-                    .iter()
-                    .filter(|attr| attr.path.is_ident("description"))
-                    .collect::<Vec<_>>();
-
                 let error_no_kind = || abort!(ident, "Enums need to specify what kind of tagging they use"; help = "Use #[description(untagged)] for untagged enums, and #[description(tag = \"type\")] for internally tagged variants. Other kinds are not supported.");
 
-                if potential_kinds.is_empty() {
+                if container_attributes.is_empty() {
                     error_no_kind()
                 }
 
                 let mut found_enum_kind = None;
 
-                for potential_kind in potential_kinds {
+                for potential_kind in &container_attributes {
                     match potential_kind
                         .parse_meta()
                         .expect_or_abort("Could not parse #[description] meta attribute.")
