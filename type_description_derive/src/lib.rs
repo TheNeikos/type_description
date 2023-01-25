@@ -14,11 +14,16 @@ use syn::{
 };
 
 #[derive(Debug)]
-struct TypeField<'q> {
-    ident: Ident,
-    ty: &'q Type,
-    docs: Option<Vec<LitStr>>,
-    optional: bool,
+enum TypeField<'q> {
+    Simple {
+        ident: Ident,
+        ty: &'q Type,
+        docs: Option<Vec<LitStr>>,
+        optional: bool,
+    },
+    Flatten {
+        ty: &'q Type,
+    },
 }
 
 #[derive(Debug)]
@@ -90,10 +95,11 @@ fn extract_docs_from_attributes<'a>(
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum SerdeFieldAttribute {
     Rename(LitStr),
     HasDefault,
+    Flatten,
 }
 
 fn extra_serde_field_attributes<'a>(
@@ -119,6 +125,9 @@ fn extra_serde_field_attributes<'a>(
                             Meta::Path(path) => {
                                 if path.is_ident("default") {
                                     return Some(SerdeFieldAttribute::HasDefault);
+                                }
+                                if path.is_ident("flatten") {
+                                    return Some(SerdeFieldAttribute::Flatten);
                                 }
                             }
                             _ => {}
@@ -157,21 +166,42 @@ impl<'q> ToTokens for TypeQuote<'q> {
                 }
             }
             TypeQuoteKind::Struct(fields) => {
-                let ident = fields.iter().map(|f| f.ident.to_string());
-                let ty = fields.iter().map(|f| f.ty);
-                let docs = fields.iter().map(|f| lit_strings_to_string_quoted(&f.docs));
-                let optional = fields.iter().map(|f| f.optional);
+
+                let fields = fields.into_iter().map(|field| {
+
+                    match field {
+                        TypeField::Simple { ident, ty, docs, optional } =>  {
+                            let ident = ident.to_string();
+                            let docs = lit_strings_to_string_quoted(&docs);
+                            quote! {
+                                [::type_description::StructField::new(#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description(), #optional)]
+                            }
+                        }
+                        TypeField::Flatten { ty } => {
+                            quote! {
+                                {
+                                    let desc = <#ty as ::type_description::AsTypeDescription>::as_type_description();
+                                    match desc.kind() {
+                                        ::type_description::TypeKind::Struct(fields) => fields.clone(),
+                                        _ => panic!("Tried to flatten a non-struct field")
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                });
 
                 quote! {
                     ::type_description::TypeDescription::new(
                         ::std::string::String::from(#ident_name),
-                        ::type_description::TypeKind::Struct(
-                            vec![
-                                #(
-                                    ::type_description::StructField::new(#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description(), #optional)
-                                ),*
-                            ]
-                        ),
+                        ::type_description::TypeKind::Struct({
+                            let mut fields = vec![];
+                            #(
+                                fields.extend(#fields);
+                            )*
+                            fields
+                        }),
                         #outer_docs
                     )
                 }
@@ -193,7 +223,13 @@ impl<'q> ToTokens for TypeQuote<'q> {
                 let variants = variants.iter().map(|var| {
                     let docs = lit_strings_to_string_quoted(&var.docs);
                     match &var.kind {
-                        TypeVariantKind::Wrapped(ident, TypeField { ty, .. }) => {
+                        TypeVariantKind::Wrapped(ident, TypeField::Flatten { ty: _ }) => {
+                            abort!(
+                                ident,
+                                "Cannot flatten wrapped fields"
+                            )
+                        }
+                        TypeVariantKind::Wrapped(ident, TypeField::Simple { ty, .. }) => {
                             // we ignore the above docs since the outer docs are the important ones
                             // TODO: Emit an error if an inner type in a enum is annotated
                             let ident = ident.to_string();
@@ -214,11 +250,22 @@ impl<'q> ToTokens for TypeQuote<'q> {
                             }
                         }
                         TypeVariantKind::Struct(ident, fields) => {
-                            let ident = ident.to_string();
-                            let idents = fields.iter().map(|f| f.ident.to_string());
-                            let field_docs = fields.iter().map(|f| lit_strings_to_string_quoted(&f.docs));
-                            let tys = fields.iter().map(|f| f.ty);
+                            let fields = fields.into_iter().map(|field| {
 
+                                match field {
+                                    TypeField::Simple { ident, ty, docs, optional: _ } =>  {
+                                        let ident = ident.to_string();
+                                        let docs = lit_strings_to_string_quoted(&docs);
+                                        quote! {
+                                            (#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description())
+                                        }
+                                    }
+                                    TypeField::Flatten { ty: _ } => {
+                                        quote! {}
+                                    }
+                                }
+
+                            });
                             quote! {
                                 ::type_description::EnumVariant::new(
                                     #ident,
@@ -226,13 +273,13 @@ impl<'q> ToTokens for TypeQuote<'q> {
                                     ::type_description::EnumVariantRepresentation::Wrapped(
                                         std::boxed::Box::new(::type_description::TypeDescription::new(
                                             ::std::string::String::from(#ident),
-                                            ::type_description::TypeKind::Struct(
-                                                vec![
-                                                    #(
-                                                        (#idents, #field_docs, <#tys as ::type_description::AsTypeDescription>::as_type_description())
-                                                     ),*
-                                                ]
-                                            ),
+                                            ::type_description::TypeKind::Struct({
+                                                let mut fields = vec![];
+                                                #(
+                                                    fields.extend(#fields);
+                                                 )*
+                                                fields
+                                            }),
                                             None
                                         ))
                                     )
@@ -318,7 +365,7 @@ pub fn derive_type_description(input: TS) -> TS {
                     .map(|f| {
                         (
                             f,
-                            TypeField {
+                            TypeField::Simple {
                                 ident: f.ident.as_ref().cloned().unwrap(),
                                 ty: &f.ty,
                                 docs: extract_docs_from_attributes(f.attrs.iter()),
@@ -332,19 +379,33 @@ pub fn derive_type_description(input: TS) -> TS {
                                 extra_serde_field_attributes(field.attrs.iter());
 
                             if let Some(serde_field_attrs) = serde_field_attrs {
-                                for attr in serde_field_attrs {
-                                    match attr {
-                                        SerdeFieldAttribute::Rename(litstr) => {
-                                            type_field.ident =
-                                                Ident::new(&litstr.value(), litstr.span());
-                                        }
-                                        SerdeFieldAttribute::HasDefault => {
-                                            type_field.optional = true;
+                                if serde_field_attrs
+                                    .iter()
+                                    .any(|s| s == &SerdeFieldAttribute::Flatten)
+                                {
+                                    type_field = TypeField::Flatten { ty: &field.ty };
+                                }
+
+                                if let TypeField::Simple {
+                                    ident,
+                                    ty: _,
+                                    docs: _,
+                                    optional,
+                                } = &mut type_field
+                                {
+                                    for attr in serde_field_attrs {
+                                        match attr {
+                                            SerdeFieldAttribute::Rename(litstr) => {
+                                                *ident = Ident::new(&litstr.value(), litstr.span());
+                                            }
+                                            SerdeFieldAttribute::HasDefault => {
+                                                *optional = true;
+                                            }
+                                            _ => (),
                                         }
                                     }
                                 }
                             }
-
                             type_field
                         } else {
                             type_field
@@ -428,7 +489,7 @@ pub fn derive_type_description(input: TS) -> TS {
                             fields
                                 .named
                                 .iter()
-                                .map(|f| TypeField {
+                                .map(|f| TypeField::Simple {
                                     ident: f.ident.as_ref().cloned().unwrap(),
                                     ty: &f.ty,
                                     docs: extract_docs_from_attributes(f.attrs.iter()),
@@ -445,7 +506,7 @@ pub fn derive_type_description(input: TS) -> TS {
                             }
                             TypeVariantKind::Wrapped(
                                 &var.ident,
-                                TypeField {
+                                TypeField::Simple {
                                     ident: var.ident.clone(),
                                     ty: &fields.unnamed.first().unwrap().ty,
                                     docs: extract_docs_from_attributes(var.attrs.iter()),
