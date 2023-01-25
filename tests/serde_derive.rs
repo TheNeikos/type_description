@@ -32,6 +32,8 @@ struct Ac {
 struct Cellar {
     cellar_temp: f32,
     cellar_humidity: f32,
+    #[serde(skip)]
+    cellar_light: bool,
 }
 
 #[derive(Debug, TypeDescription, Serialize, Deserialize)]
@@ -66,7 +68,7 @@ fn check_type_description() {
             assert_eq!(fields[1].optional(), true);
             assert_eq!(fields[2].optional(), false);
 
-            assert_eq!(8, fields.len());
+            assert_eq!(7, fields.len());
         }
         _ => panic!("Should be a struct"),
     }

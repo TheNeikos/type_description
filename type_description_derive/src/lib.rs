@@ -100,6 +100,7 @@ enum SerdeFieldAttribute {
     Rename(LitStr),
     HasDefault,
     Flatten,
+    Skip,
 }
 
 fn extra_serde_field_attributes<'a>(
@@ -128,6 +129,9 @@ fn extra_serde_field_attributes<'a>(
                                 }
                                 if path.is_ident("flatten") {
                                     return Some(SerdeFieldAttribute::Flatten);
+                                }
+                                if path.is_ident("skip") || path.is_ident("skip_deserializing") {
+                                    return Some(SerdeFieldAttribute::Skip);
                                 }
                             }
                             _ => {}
@@ -373,7 +377,7 @@ pub fn derive_type_description(input: TS) -> TS {
                             },
                         )
                     })
-                    .map(|(field, mut type_field)| {
+                    .flat_map(|(field, mut type_field)| {
                         if use_serde {
                             let serde_field_attrs =
                                 extra_serde_field_attributes(field.attrs.iter());
@@ -401,14 +405,17 @@ pub fn derive_type_description(input: TS) -> TS {
                                             SerdeFieldAttribute::HasDefault => {
                                                 *optional = true;
                                             }
+                                            SerdeFieldAttribute::Skip => {
+                                                return None;
+                                            }
                                             _ => (),
                                         }
                                     }
                                 }
                             }
-                            type_field
+                            Some(type_field)
                         } else {
-                            type_field
+                            Some(type_field)
                         }
                     })
                     .collect(),
