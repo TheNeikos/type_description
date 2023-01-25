@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <script type="module">
+            import init from './online_description_generator.js';
+            var wasm = await init();
+
+            function run_compile(inputElId, outputElId) {
+                var input = document.getElementById(inputElId);
+                var output = document.getElementById(outputElId);
+                output.innerHTML = wasm.compile(input.value);
+            }
+
+            window.run_compile = run_compile;
+        </script>
+        <div id="container inputcontainer">
+            <input id="input" type="text" onchange="run_compile('input', 'output')" />
+        <div>
+        <div id="container outputcontainer">
+            <h1>Output</h1>
+            <p id="output"></p>
+        </div>
+        <script>
+    </body>
+</html>
