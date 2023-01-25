@@ -108,7 +108,7 @@ fn extra_serde_field_attributes<'a>(
 ) -> Option<Vec<SerdeFieldAttribute>> {
     let attrs = attrs
         .filter(|attr| attr.path.is_ident("serde"))
-        .map(|attr| match attr.parse_meta() {
+        .flat_map(|attr| match attr.parse_meta() {
             Ok(Meta::List(list)) => list
                 .nested
                 .into_iter()
@@ -142,7 +142,6 @@ fn extra_serde_field_attributes<'a>(
                 .collect::<Vec<_>>(),
             _ => vec![],
         })
-        .flatten()
         .collect::<Vec<_>>();
 
     if attrs.is_empty() {
@@ -171,12 +170,12 @@ impl<'q> ToTokens for TypeQuote<'q> {
             }
             TypeQuoteKind::Struct(fields) => {
 
-                let fields = fields.into_iter().map(|field| {
+                let fields = fields.iter().map(|field| {
 
                     match field {
                         TypeField::Simple { ident, ty, docs, optional } =>  {
                             let ident = ident.to_string();
-                            let docs = lit_strings_to_string_quoted(&docs);
+                            let docs = lit_strings_to_string_quoted(docs);
                             quote! {
                                 [::type_description::StructField::new(#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description(), #optional)]
                             }
@@ -254,12 +253,12 @@ impl<'q> ToTokens for TypeQuote<'q> {
                             }
                         }
                         TypeVariantKind::Struct(ident, fields) => {
-                            let fields = fields.into_iter().map(|field| {
+                            let fields = fields.iter().map(|field| {
 
                                 match field {
                                     TypeField::Simple { ident, ty, docs, optional: _ } =>  {
                                         let ident = ident.to_string();
-                                        let docs = lit_strings_to_string_quoted(&docs);
+                                        let docs = lit_strings_to_string_quoted(docs);
                                         quote! {
                                             (#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description())
                                         }
@@ -336,7 +335,7 @@ pub fn derive_type_description(input: TS) -> TS {
     let use_serde = desc_container_attributes
         .iter()
         .filter(|attr| attr.path.is_ident("description"))
-        .find(|attr| match attr.parse_meta() {
+        .any(|attr| match attr.parse_meta() {
             Err(_) => false,
             Ok(meta) => match meta {
                 syn::Meta::List(kind) => {
@@ -345,20 +344,13 @@ pub fn derive_type_description(input: TS) -> TS {
                     }
 
                     match kind.nested.first() {
-                        Some(NestedMeta::Meta(Meta::Path(path))) => {
-                            if path.is_ident("use_serde") {
-                                true
-                            } else {
-                                false
-                            }
-                        }
+                        Some(NestedMeta::Meta(Meta::Path(path))) => path.is_ident("use_serde"),
                         _ => false,
                     }
                 }
                 _ => false,
             },
-        })
-        .is_some();
+        });
 
     let type_desc_kind: TypeQuoteKind = match &input.data {
         syn::Data::Struct(data) => match &data.fields {

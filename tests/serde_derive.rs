@@ -64,9 +64,9 @@ fn check_type_description() {
         type_description::TypeKind::Struct(fields) => {
             assert_eq!(fields[2].name(), "climate_control");
 
-            assert_eq!(fields[0].optional(), true);
-            assert_eq!(fields[1].optional(), true);
-            assert_eq!(fields[2].optional(), false);
+            assert!(fields[0].optional());
+            assert!(fields[1].optional());
+            assert!(!fields[2].optional());
 
             assert_eq!(7, fields.len());
         }
