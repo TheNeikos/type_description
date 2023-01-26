@@ -21,8 +21,12 @@ jobs:
           # If you chose API tokens for write access OR if you have a private cache
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - run: nix --extra-experimental-features "nix-command flakes" build .#book
+      - run: mkdir -p output/book output/description_viewer
+      - run: cp -LR result/* output/book
+      - run: nix --extra-experimental-features "nix-command flakes" build .#description_website
+      - run: cp -LR result/* output/description_viewer
       - uses: JamesIves/github-pages-deploy-action@v4.4.1
         if: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
         with:
           branch: gh-pages
-          folder: result
+          folder: output
