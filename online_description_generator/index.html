@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Trunk | Vanilla | web-sys</title>
+
+    <base data-trunk-public-url/>
+    <link data-trunk rel="css" href="src/reset.css"/>
+    <link data-trunk rel="scss" href="src/index.scss"/>
+</head>
+<body>
+    <link data-trunk rel="rust" href="Cargo.toml" data-wasm-opt="z" data-bin="online_description_generator"/>
+    <div class="container">
+        <textarea id="input"></textarea>
+        <div id="output"></div>
+    </div>
+</body>
+</html>
