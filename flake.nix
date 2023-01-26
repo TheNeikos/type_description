@@ -33,7 +33,7 @@
 
         tomlInfo = craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; };
         inherit (tomlInfo) pname version;
-        src = pkgs.nix-gitignore.gitignoreSource [] ./.;
+        src = pkgs.nix-gitignore.gitignoreSource [ ] ./.;
 
         cargoArtifacts = craneLib.buildDepsOnly {
           inherit src;
@@ -56,6 +56,25 @@
 
           nativeBuildInputs = [ pkgs.mdbook ];
         };
+
+        description_website = craneLib.mkCargoDerivation {
+          inherit cargoArtifacts src version;
+
+          CARGO_NET_OFFLINE = "true";
+          TRUNK_STAGING_DIR = "/tmp/trunk-staging";
+          XDG_CACHE_HOME = "/tmp/trunk-cache";
+          RUST_LOG="trace";
+          buildPhaseCargoCommand = "trunk -v build online_description_generator/index.html --dist $out --release";
+
+          pname = "type_description_website";
+
+          nativeBuildInputs = [
+            pkgs.trunk
+            pkgs.wasm-bindgen-cli
+            pkgs.binaryen
+            pkgs.nodePackages.sass
+          ];
+        };
       in
       rec {
         checks = {
@@ -72,6 +91,7 @@
         };
 
         packages.book = book;
+        packages.description_website = description_website;
         packages.type_description = type_description;
         packages.default = packages.type_description;
 
@@ -87,6 +107,8 @@
 
             pkgs.mdbook
             pkgs.trunk
+            pkgs.wasm-bindgen-cli
+            pkgs.binaryen
             pkgs.nodePackages.sass
           ];
         };
