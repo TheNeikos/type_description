@@ -26,7 +26,7 @@
           overlays = [ (import rust-overlay) ];
         };
 
-        rustTarget = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain;
+        rustTarget = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
 
         craneLib = (crane.mkLib pkgs).overrideToolchain rustTarget;
 
@@ -86,6 +86,8 @@
             pkgs.cargo-bloat
 
             pkgs.mdbook
+            pkgs.trunk
+            pkgs.nodePackages.sass
           ];
         };
         devShells.default = devShells.type_description;
