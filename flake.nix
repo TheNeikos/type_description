@@ -92,8 +92,10 @@
           CARGO_NET_OFFLINE = "true";
           TRUNK_STAGING_DIR = "/tmp/trunk-staging";
           XDG_CACHE_HOME = "/tmp/trunk-cache";
-          RUST_LOG="trace";
-          buildPhaseCargoCommand = "trunk -v build online_description_generator/index.html --dist $out --release";
+
+          buildPhaseCargoCommand = "trunk build online_description_generator/index.html --dist $out --release";
+
+          postFixup = "rm -rf $out/target";
 
           pname = "type_description_website";
 
@@ -136,7 +138,7 @@
 
             pkgs.mdbook
             pkgs.trunk
-            pkgs.wasm-bindgen-cli
+            wasm-bindgen-cli
             pkgs.binaryen
             pkgs.nodePackages.sass
           ];
