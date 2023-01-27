@@ -68,7 +68,7 @@ fn check_type_description() {
             assert!(fields[1].optional());
             assert!(!fields[2].optional());
 
-            assert_eq!(7, fields.len());
+            assert_eq!(fields.len(), 7);
         }
         _ => panic!("Should be a struct"),
     }
