@@ -389,8 +389,8 @@ function getImports() {
     imports.wbg.__wbindgen_throw = function(arg0, arg1) {
         throw new Error(getStringFromWasm0(arg0, arg1));
     };
-    imports.wbg.__wbindgen_closure_wrapper145 = function(arg0, arg1, arg2) {
-        const ret = makeMutClosure(arg0, arg1, 53, __wbg_adapter_12);
+    imports.wbg.__wbindgen_closure_wrapper147 = function(arg0, arg1, arg2) {
+        const ret = makeMutClosure(arg0, arg1, 54, __wbg_adapter_12);
         return addHeapObject(ret);
     };
 
@@ -427,7 +427,7 @@ function initSync(module) {
 
 async function init(input) {
     if (typeof input === 'undefined') {
-        input = new URL('online_description_generator-9fe09155c1a8457_bg.wasm', import.meta.url);
+        input = new URL('online_description_generator-bce407f1d65637fa_bg.wasm', import.meta.url);
     }
     const imports = getImports();
 
