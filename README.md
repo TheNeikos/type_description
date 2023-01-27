@@ -4,7 +4,7 @@
 
 This crate provides machine-readable descriptions for types.
 
-For a general overview, please check out [the guide](https://neikos.me/type_description/).
+For a general overview, please check out [the guide](https://neikos.me/type_description/book/).
 
 The idea is to make types discoverable for users by explaining them in a way
 that a _user_ can understand without knowing implementation details (a `u16` is
