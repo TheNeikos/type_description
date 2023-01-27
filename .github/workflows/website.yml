@@ -25,6 +25,7 @@ jobs:
       - run: cp -LR result/* output/book
       - run: nix --extra-experimental-features "nix-command flakes" build .#description_website
       - run: cp -LR result/* output/description_viewer
+      - run: tree output
       - uses: JamesIves/github-pages-deploy-action@v4.4.1
         if: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
         with:
