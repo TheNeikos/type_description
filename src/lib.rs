@@ -18,7 +18,7 @@ pub use type_description_derive::TypeDescription;
 pub mod render;
 
 /// Generic description of a type
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash, Clone)]
 pub struct TypeDescription {
     name: String,
     kind: TypeKind,
@@ -56,7 +56,7 @@ impl TypeDescription {
 }
 
 /// Representation of an enum
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash, Clone)]
 pub enum EnumVariantRepresentation {
     /// The enum is represented by a string
     ///
@@ -67,7 +67,7 @@ pub enum EnumVariantRepresentation {
 }
 
 /// The kind of enum tagging used by the [`TypeKind::Enum`]
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash, Clone)]
 pub enum TypeEnumKind {
     /// An internal tag with the given tag name
     Tagged(Cow<'static, str>),
@@ -76,20 +76,27 @@ pub enum TypeEnumKind {
 }
 
 /// A field in a [`TypeKind::Struct`]
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash, Clone)]
 pub struct StructField {
     name: Cow<'static, str>,
     doc: Option<Cow<'static, str>>,
     kind: TypeDescription,
+    optional: bool,
 }
 
 impl StructField {
     /// Create a new [`StructField`]
-    pub fn new(name: &'static str, doc: Option<&'static str>, kind: TypeDescription) -> Self {
+    pub fn new(
+        name: &'static str,
+        doc: Option<&'static str>,
+        kind: TypeDescription,
+        optional: bool,
+    ) -> Self {
         Self {
             name: Cow::Borrowed(name),
             doc: doc.map(Cow::Borrowed),
             kind,
+            optional,
         }
     }
 
@@ -107,10 +114,15 @@ impl StructField {
     pub fn kind(&self) -> &TypeDescription {
         &self.kind
     }
+
+    /// Whether this field is optional
+    pub fn optional(&self) -> bool {
+        self.optional
+    }
 }
 
 /// A variant in a [`TypeKind::Enum`]
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash, Clone)]
 pub struct EnumVariant {
     name: Cow<'static, str>,
     doc: Option<Cow<'static, str>>,
@@ -148,7 +160,7 @@ impl EnumVariant {
 }
 
 /// The specific kind a [`struct@TypeDescription`] represents
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash, Clone)]
 pub enum TypeKind {
     /// Type represents a boolean `true`/`false`
     Bool,
@@ -197,7 +209,7 @@ pub enum TypeKind {
 }
 
 /// Whether an integer is a signed integer or an unsigned integer
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash, Clone)]
 pub enum Sign {
     /// A signed integer
     Signed,

@@ -142,6 +142,9 @@
             pkgs.binaryen
             pkgs.nodePackages.sass
           ];
+
+          # Tell the trybuild crate to not use the wip folder
+          TRYBUILD="overwrite";
         };
         devShells.default = devShells.type_description;
       }

@@ -14,10 +14,16 @@ use syn::{
 };
 
 #[derive(Debug)]
-struct TypeField<'q> {
-    ident: &'q Ident,
-    ty: &'q Type,
-    docs: Option<Vec<LitStr>>,
+enum TypeField<'q> {
+    Simple {
+        ident: Ident,
+        ty: &'q Type,
+        docs: Option<Vec<LitStr>>,
+        optional: bool,
+    },
+    Flatten {
+        ty: &'q Type,
+    },
 }
 
 #[derive(Debug)]
@@ -89,6 +95,62 @@ fn extract_docs_from_attributes<'a>(
     }
 }
 
+#[derive(Debug, PartialEq)]
+enum SerdeFieldAttribute {
+    Rename(LitStr),
+    HasDefault,
+    Flatten,
+    Skip,
+}
+
+fn extra_serde_field_attributes<'a>(
+    attrs: impl Iterator<Item = &'a Attribute>,
+) -> Option<Vec<SerdeFieldAttribute>> {
+    let attrs = attrs
+        .filter(|attr| attr.path.is_ident("serde"))
+        .flat_map(|attr| match attr.parse_meta() {
+            Ok(Meta::List(list)) => list
+                .nested
+                .into_iter()
+                .filter_map(|meta| match meta {
+                    NestedMeta::Lit(_) => None,
+                    NestedMeta::Meta(meta) => {
+                        match meta {
+                            Meta::NameValue(meta) => {
+                                if meta.path.is_ident("rename") {
+                                    if let Lit::Str(litstr) = meta.lit {
+                                        return Some(SerdeFieldAttribute::Rename(litstr));
+                                    }
+                                }
+                            }
+                            Meta::Path(path) => {
+                                if path.is_ident("default") {
+                                    return Some(SerdeFieldAttribute::HasDefault);
+                                }
+                                if path.is_ident("flatten") {
+                                    return Some(SerdeFieldAttribute::Flatten);
+                                }
+                                if path.is_ident("skip") || path.is_ident("skip_deserializing") {
+                                    return Some(SerdeFieldAttribute::Skip);
+                                }
+                            }
+                            _ => {}
+                        }
+                        None
+                    }
+                })
+                .collect::<Vec<_>>(),
+            _ => vec![],
+        })
+        .collect::<Vec<_>>();
+
+    if attrs.is_empty() {
+        None
+    } else {
+        Some(attrs)
+    }
+}
+
 impl<'q> ToTokens for TypeQuote<'q> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let ident_name = self.ident.to_string();
@@ -107,20 +169,42 @@ impl<'q> ToTokens for TypeQuote<'q> {
                 }
             }
             TypeQuoteKind::Struct(fields) => {
-                let ident = fields.iter().map(|f| f.ident.to_string());
-                let ty = fields.iter().map(|f| f.ty);
-                let docs = fields.iter().map(|f| lit_strings_to_string_quoted(&f.docs));
+
+                let fields = fields.iter().map(|field| {
+
+                    match field {
+                        TypeField::Simple { ident, ty, docs, optional } =>  {
+                            let ident = ident.to_string();
+                            let docs = lit_strings_to_string_quoted(docs);
+                            quote! {
+                                [::type_description::StructField::new(#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description(), #optional)]
+                            }
+                        }
+                        TypeField::Flatten { ty } => {
+                            quote! {
+                                {
+                                    let desc = <#ty as ::type_description::AsTypeDescription>::as_type_description();
+                                    match desc.kind() {
+                                        ::type_description::TypeKind::Struct(fields) => fields.clone(),
+                                        _ => panic!("Tried to flatten a non-struct field")
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                });
 
                 quote! {
                     ::type_description::TypeDescription::new(
                         ::std::string::String::from(#ident_name),
-                        ::type_description::TypeKind::Struct(
-                            vec![
-                                #(
-                                    ::type_description::StructField::new(#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description())
-                                ),*
-                            ]
-                        ),
+                        ::type_description::TypeKind::Struct({
+                            let mut fields = vec![];
+                            #(
+                                fields.extend(#fields);
+                            )*
+                            fields
+                        }),
                         #outer_docs
                     )
                 }
@@ -142,7 +226,13 @@ impl<'q> ToTokens for TypeQuote<'q> {
                 let variants = variants.iter().map(|var| {
                     let docs = lit_strings_to_string_quoted(&var.docs);
                     match &var.kind {
-                        TypeVariantKind::Wrapped(ident, TypeField { ty, .. }) => {
+                        TypeVariantKind::Wrapped(ident, TypeField::Flatten { ty: _ }) => {
+                            abort!(
+                                ident,
+                                "Cannot flatten wrapped fields"
+                            )
+                        }
+                        TypeVariantKind::Wrapped(ident, TypeField::Simple { ty, .. }) => {
                             // we ignore the above docs since the outer docs are the important ones
                             // TODO: Emit an error if an inner type in a enum is annotated
                             let ident = ident.to_string();
@@ -163,11 +253,22 @@ impl<'q> ToTokens for TypeQuote<'q> {
                             }
                         }
                         TypeVariantKind::Struct(ident, fields) => {
-                            let ident = ident.to_string();
-                            let idents = fields.iter().map(|f| f.ident.to_string());
-                            let field_docs = fields.iter().map(|f| lit_strings_to_string_quoted(&f.docs));
-                            let tys = fields.iter().map(|f| f.ty);
+                            let fields = fields.iter().map(|field| {
 
+                                match field {
+                                    TypeField::Simple { ident, ty, docs, optional: _ } =>  {
+                                        let ident = ident.to_string();
+                                        let docs = lit_strings_to_string_quoted(docs);
+                                        quote! {
+                                            (#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description())
+                                        }
+                                    }
+                                    TypeField::Flatten { ty: _ } => {
+                                        quote! {}
+                                    }
+                                }
+
+                            });
                             quote! {
                                 ::type_description::EnumVariant::new(
                                     #ident,
@@ -175,13 +276,13 @@ impl<'q> ToTokens for TypeQuote<'q> {
                                     ::type_description::EnumVariantRepresentation::Wrapped(
                                         std::boxed::Box::new(::type_description::TypeDescription::new(
                                             ::std::string::String::from(#ident),
-                                            ::type_description::TypeKind::Struct(
-                                                vec![
-                                                    #(
-                                                        (#idents, #field_docs, <#tys as ::type_description::AsTypeDescription>::as_type_description())
-                                                     ),*
-                                                ]
-                                            ),
+                                            ::type_description::TypeKind::Struct({
+                                                let mut fields = vec![];
+                                                #(
+                                                    fields.extend(#fields);
+                                                 )*
+                                                fields
+                                            }),
                                             None
                                         ))
                                     )
@@ -225,16 +326,89 @@ pub fn derive_type_description(input: TS) -> TS {
 
     let ident = &input.ident;
 
+    let desc_container_attributes = input
+        .attrs
+        .iter()
+        .filter(|attr| attr.path.is_ident("description"))
+        .collect::<Vec<_>>();
+
+    let use_serde = desc_container_attributes
+        .iter()
+        .filter(|attr| attr.path.is_ident("description"))
+        .any(|attr| match attr.parse_meta() {
+            Err(_) => false,
+            Ok(meta) => match meta {
+                syn::Meta::List(kind) => {
+                    if kind.nested.len() != 1 {
+                        return false;
+                    }
+
+                    match kind.nested.first() {
+                        Some(NestedMeta::Meta(Meta::Path(path))) => path.is_ident("use_serde"),
+                        _ => false,
+                    }
+                }
+                _ => false,
+            },
+        });
+
     let type_desc_kind: TypeQuoteKind = match &input.data {
         syn::Data::Struct(data) => match &data.fields {
             syn::Fields::Named(fields) => TypeQuoteKind::Struct(
                 fields
                     .named
                     .iter()
-                    .map(|f| TypeField {
-                        ident: f.ident.as_ref().unwrap(),
-                        ty: &f.ty,
-                        docs: extract_docs_from_attributes(f.attrs.iter()),
+                    .map(|f| {
+                        (
+                            f,
+                            TypeField::Simple {
+                                ident: f.ident.as_ref().cloned().unwrap(),
+                                ty: &f.ty,
+                                docs: extract_docs_from_attributes(f.attrs.iter()),
+                                optional: false,
+                            },
+                        )
+                    })
+                    .flat_map(|(field, mut type_field)| {
+                        if use_serde {
+                            let serde_field_attrs =
+                                extra_serde_field_attributes(field.attrs.iter());
+
+                            if let Some(serde_field_attrs) = serde_field_attrs {
+                                if serde_field_attrs
+                                    .iter()
+                                    .any(|s| s == &SerdeFieldAttribute::Flatten)
+                                {
+                                    type_field = TypeField::Flatten { ty: &field.ty };
+                                }
+
+                                if let TypeField::Simple {
+                                    ident,
+                                    ty: _,
+                                    docs: _,
+                                    optional,
+                                } = &mut type_field
+                                {
+                                    for attr in serde_field_attrs {
+                                        match attr {
+                                            SerdeFieldAttribute::Rename(litstr) => {
+                                                *ident = Ident::new(&litstr.value(), litstr.span());
+                                            }
+                                            SerdeFieldAttribute::HasDefault => {
+                                                *optional = true;
+                                            }
+                                            SerdeFieldAttribute::Skip => {
+                                                return None;
+                                            }
+                                            _ => (),
+                                        }
+                                    }
+                                }
+                            }
+                            Some(type_field)
+                        } else {
+                            Some(type_field)
+                        }
                     })
                     .collect(),
             ),
@@ -254,65 +428,54 @@ pub fn derive_type_description(input: TS) -> TS {
         },
         syn::Data::Enum(data) => {
             let enum_kind: TypeEnumKind = {
-                let potential_kind = input
-                    .attrs
-                    .iter()
-                    .find(|attr| attr.path.is_ident("description"))
-                    .unwrap_or_else(|| {
-                        abort!(ident, "Enums need to specify what kind of tagging they use"; 
-                               help = "Use #[description(untagged)] for untagged enums, and #[description(tag = \"type\")] for internally tagged variants. Other kinds are not supported.")
-                    });
+                let error_no_kind = || abort!(ident, "Enums need to specify what kind of tagging they use"; help = "Use #[description(untagged)] for untagged enums, and #[description(tag = \"type\")] for internally tagged variants. Other kinds are not supported.");
 
-                macro_rules! abort_parse_enum_kind {
-                    ($kind:expr) => {
-                            abort!($kind, "Could not parse enum tag kind.";
-                                   help = "Accepted kinds are #[description(untagged)] and #[description(tag = \"type\')].")
+                if desc_container_attributes.is_empty() {
+                    error_no_kind()
+                }
+
+                let mut found_enum_kind = None;
+
+                for potential_kind in &desc_container_attributes {
+                    match potential_kind
+                        .parse_meta()
+                        .expect_or_abort("Could not parse #[description] meta attribute.")
+                    {
+                        syn::Meta::List(kind) => {
+                            if kind.nested.len() != 1 {
+                                continue;
+                            }
+
+                            match kind.nested.first() {
+                                Some(NestedMeta::Meta(Meta::NameValue(MetaNameValue {
+                                    path,
+                                    lit: Lit::Str(lit_str),
+                                    ..
+                                }))) => {
+                                    if path.is_ident("tag") {
+                                        found_enum_kind =
+                                            Some(TypeEnumKind::Tagged(lit_str.clone()));
+                                    }
+                                }
+                                Some(NestedMeta::Meta(Meta::Path(path))) => {
+                                    if path.is_ident("untagged") {
+                                        found_enum_kind = Some(TypeEnumKind::Untagged);
+                                    }
+                                }
+                                _ => {
+                                    continue;
+                                }
+                            }
+                        }
+                        _ => continue,
                     }
                 }
 
-                match potential_kind
-                    .parse_meta()
-                    .expect_or_abort("Could not parse #[description] meta attribute.")
-                {
-                    syn::Meta::Path(kind) => {
-                        abort_parse_enum_kind!(kind)
-                    }
-                    syn::Meta::List(kind) => {
-                        if kind.nested.len() != 1 {
-                            abort_parse_enum_kind!(kind)
-                        }
-
-                        match kind.nested.first() {
-                            Some(NestedMeta::Meta(Meta::NameValue(MetaNameValue {
-                                path,
-                                lit: Lit::Str(lit_str),
-                                ..
-                            }))) => {
-                                if path.is_ident("tag") {
-                                    TypeEnumKind::Tagged(lit_str.clone())
-                                } else {
-                                    abort_parse_enum_kind!(kind)
-                                }
-                            }
-                            Some(NestedMeta::Meta(Meta::Path(path))) => {
-                                if path.is_ident("untagged") {
-                                    TypeEnumKind::Untagged
-                                } else {
-                                    abort_parse_enum_kind!(path)
-                                }
-                            }
-                            _ => {
-                                println!("Oh no!");
-                                abort_parse_enum_kind!(kind)
-                            }
-                        }
-                    }
-                    syn::Meta::NameValue(kind) => abort!(
-                        kind,
-                        "The #[description] attribute cannot be used as a name-value attribute.";
-                        help = "Maybe you meant #[description(tag = \"type\")] to describe that this enum has an internal tag?"
-                    ),
+                if found_enum_kind.is_none() {
+                    error_no_kind()
                 }
+
+                found_enum_kind.unwrap()
             };
 
             let variants = data
@@ -325,10 +488,11 @@ pub fn derive_type_description(input: TS) -> TS {
                             fields
                                 .named
                                 .iter()
-                                .map(|f| TypeField {
-                                    ident: f.ident.as_ref().unwrap(),
+                                .map(|f| TypeField::Simple {
+                                    ident: f.ident.as_ref().cloned().unwrap(),
                                     ty: &f.ty,
                                     docs: extract_docs_from_attributes(f.attrs.iter()),
+                                    optional: false,
                                 })
                                 .collect(),
                         ),
@@ -341,10 +505,11 @@ pub fn derive_type_description(input: TS) -> TS {
                             }
                             TypeVariantKind::Wrapped(
                                 &var.ident,
-                                TypeField {
-                                    ident: &var.ident,
+                                TypeField::Simple {
+                                    ident: var.ident.clone(),
                                     ty: &fields.unnamed.first().unwrap().ty,
                                     docs: extract_docs_from_attributes(var.attrs.iter()),
+                                    optional: false,
                                 },
                             )
                         }
