@@ -212,11 +212,13 @@ dependencies = [
 
 [[package]]
 name = "markdown"
-version = "1.0.0-alpha.5"
+version = "1.0.0-alpha.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e15a8b67b7a9cb4bfbda3131ab091529c338174c78da8d46adbce1e510daf191"
+checksum = "2f554f6e9e42fc8558c32803a1070a2471d5b4c515225add0b69fb5cff2d0266"
 dependencies = [
  "log",
+ "serde",
+ "serde_json",
  "unicode-id",
 ]
 
