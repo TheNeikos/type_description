@@ -24,7 +24,7 @@ bin = ["clap", "serde_json"]
 
 [dependencies]
 clap = { version = "4.2.1", features = ["derive"], optional = true }
-indexmap = { version = "1.9.2", optional = true }
+indexmap = { version = "1.9.3", optional = true }
 serde = { version = "1.0.159", features = ["derive"] }
 serde_json = { version = "1.0.95", optional = true }
 type_description_derive = { version = "0.3.0", path = "type_description_derive" }
