@@ -66,10 +66,14 @@
 
         cargoArtifacts = craneLib.buildDepsOnly {
           inherit src;
+
+          cargoExtraArgs = "--all-features";
         };
 
         type_description = craneLib.buildPackage {
           inherit cargoArtifacts src version;
+
+          cargoExtraArgs = "--all-features";
         };
 
         book = craneLib.mkCargoDerivation {
@@ -113,7 +117,7 @@
 
           type_description-clippy = craneLib.cargoClippy {
             inherit cargoArtifacts src;
-            cargoClippyExtraArgs = "-- --deny warnings";
+            cargoClippyExtraArgs = "--all-features -- --deny warnings";
           };
 
           type_description-fmt = craneLib.cargoFmt {
@@ -144,7 +148,7 @@
           ];
 
           # Tell the trybuild crate to not use the wip folder
-          TRYBUILD="overwrite";
+          TRYBUILD = "overwrite";
         };
         devShells.default = devShells.type_description;
       }
