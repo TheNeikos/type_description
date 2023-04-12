@@ -58,6 +58,11 @@ match desc.kind() {
 }
 ```
 
+## Extra Types
+
+This crate contains a `AsTypeDescription` implementation for various third party crates. 
+The up to date list can be found on [docs.rs](https://docs.rs/type_description/latest/type_description/trait.AsTypeDescription.html#foreign-impls).
+
 ## Goals
 
 * Follow the `serde` model and be compatible with all
