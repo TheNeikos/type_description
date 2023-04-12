@@ -3,6 +3,10 @@ status = [
     "CI"
 ]
 
+pr_status = [
+    "Build, Test, and Publish Guide"
+]
+
 cut_body_after = "<details>"
 
 delete_merged_branches = true
