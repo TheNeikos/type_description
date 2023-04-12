@@ -309,7 +309,7 @@ impl_config_kind!(TypeKind::String; "String"; "An IPv6 socket address" => std::n
 #[cfg(feature = "url")]
 impl_config_kind!(TypeKind::String; "String"; "An URL" => url::Url);
 
-impl_config_kind!(TypeKind::String; "String"; "A path" => std::path::PathBuf);
+impl_config_kind!(TypeKind::String; "String"; "A filesystem path" => std::path::PathBuf);
 
 #[cfg(test)]
 mod tests {
