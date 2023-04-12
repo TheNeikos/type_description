@@ -306,6 +306,9 @@ impl_config_kind!(TypeKind::String; "String"; "A socket address" => std::net::So
 impl_config_kind!(TypeKind::String; "String"; "An IPv4 socket address" => std::net::SocketAddrV4);
 impl_config_kind!(TypeKind::String; "String"; "An IPv6 socket address" => std::net::SocketAddrV6);
 
+#[cfg(feature = "url")]
+impl_config_kind!(TypeKind::String; "String"; "An URL" => url::Url);
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
