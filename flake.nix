@@ -90,14 +90,16 @@
           nativeBuildInputs = [ pkgs.mdbook ];
         };
 
-        description_website = craneLib.mkCargoDerivation {
+        description_website = craneLib.mkCargoDerivation rec {
           inherit cargoArtifacts src version;
 
           CARGO_NET_OFFLINE = "true";
           TRUNK_STAGING_DIR = "/tmp/trunk-staging";
           XDG_CACHE_HOME = "/tmp/trunk-cache";
 
-          buildPhaseCargoCommand = "trunk build online_description_generator/index.html --dist $out --release";
+          PUBLIC_URL = "/";
+
+          buildPhaseCargoCommand = "trunk build online_description_generator/index.html --dist $out --release --public-url $PUBLIC_URL";
 
           postFixup = "rm -rf $out/target";
 
@@ -127,6 +129,7 @@
 
         packages.book = book;
         packages.description_website = description_website;
+        packages.description_website_gh_pages = description_website.overrideAttrs (_: _: { PUBLIC_URL = "type_description/description_viewer/"; });
         packages.type_description = type_description;
         packages.default = packages.type_description;
 
