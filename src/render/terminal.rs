@@ -11,7 +11,22 @@ use crate::TypeDescription;
 use crate::TypeEnumKind;
 use crate::TypeKind;
 
-/// Get a [`RefDoc`](pretty::RefDoc) which can be used to write the documentation of this
+/// Get a [`RefDoc`](pretty::RefDoc) which can be converted into a String to print to a terminal
+/// with colors
+///
+/// ## Example
+///
+/// ```rust,no_run
+/// let input: type_description::TypeDescription = todo!();
+/// let terminal_width = term_size::dimensions().map(|(w, _)| w).unwrap_or(80);
+/// let arena = pretty::Arena::new();
+///
+/// let rendered_doc = type_description::render::render_to_terminal(&input, &arena);
+///
+/// let mut output = String::new();
+/// rendered_doc.render_fmt(terminal_width, &mut output).unwrap();
+/// println!("{}", output);
+/// ```
 pub fn render_to_terminal<'a>(desc: &'a TypeDescription, arena: &'a Arena<'a>) -> RefDoc<'a> {
     let mut doc = arena.nil();
 
