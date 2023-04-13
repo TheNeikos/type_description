@@ -7,6 +7,7 @@ description = "Machine-readable type descriptions"
 repository = "https://github.com/TheNeikos/type_description"
 keywords = ["type_description", "serde", "machine-readable"]
 categories = ["config", "rust-patterns", "value-formatting"]
+resolver = "2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -18,16 +19,22 @@ name = "describe_types"
 required-features = ["bin"]
 
 [features]
-default = ["render"]
-render = ["indexmap"]
-bin = ["clap", "serde_json"]
+default = []
+render = ["render_markdown", "render_terminal"]
+render_markdown = ["dep:indexmap"]
+render_terminal = ["dep:termimad", "dep:pretty", "dep:nu-ansi-term"]
+bin = ["render", "dep:clap", "dep:serde_json", "dep:term_size"]
 url = ["dep:url"]
 
 [dependencies]
 clap = { version = "4.2.1", features = ["derive"], optional = true }
 indexmap = { version = "1.9.3", optional = true }
+nu-ansi-term = { version = "0.47.0", optional = true }
+pretty = { version = "0.12.0", optional = true }
 serde = { version = "1.0.159", features = ["derive"] }
 serde_json = { version = "1.0.95", optional = true }
+term_size = { version = "0.3.2", optional = true }
+termimad = { version = "0.23.0", optional = true }
 type_description_derive = { version = "0.3.0", path = "type_description_derive" }
 
 url = { version = "2", optional = true }

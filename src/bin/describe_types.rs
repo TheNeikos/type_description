@@ -7,17 +7,19 @@
 use std::{error::Error, fmt::Display};
 
 use clap::{Parser, ValueEnum};
-use type_description::{render::render_to_markdown, TypeDescription};
+use type_description::{render::render_to_markdown, render::render_to_terminal, TypeDescription};
 
 #[derive(Debug, ValueEnum, PartialEq, Clone, Copy)]
 enum OutputFormat {
     Markdown,
+    Terminal,
 }
 
 impl Display for OutputFormat {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             OutputFormat::Markdown => write!(f, "markdown"),
+            OutputFormat::Terminal => write!(f, "terminal"),
         }
     }
 }
@@ -25,7 +27,7 @@ impl Display for OutputFormat {
 #[derive(Parser, Debug)]
 #[clap(author, version, about)]
 struct Args {
-    #[clap(short, long, value_parser, default_value_t = OutputFormat::Markdown)]
+    #[clap(short, long, value_parser)]
     output_format: OutputFormat,
 }
 
@@ -37,6 +39,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     match args.output_format {
         OutputFormat::Markdown => {
             println!("{}", render_to_markdown(&input)?);
+        }
+        OutputFormat::Terminal => {
+            let terminal_width = term_size::dimensions().map(|(w, _)| w).unwrap_or(80);
+            let arena = pretty::Arena::new();
+
+            let rendered_doc = render_to_terminal(&input, &arena);
+
+            let mut output = String::new();
+            rendered_doc.render_fmt(terminal_width, &mut output)?;
+            println!("{}", output);
         }
     }
 
