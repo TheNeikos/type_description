@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 pub use type_description_derive::TypeDescription;
 
 /// Rendering support for [`struct@TypeDescription`]s
-#[cfg(feature = "render")]
+#[cfg(any(feature = "render_markdown", feature = "render_terminal"))]
 pub mod render;
 
 /// Generic description of a type
