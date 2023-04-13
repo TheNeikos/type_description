@@ -23,7 +23,7 @@ jobs:
       - run: nix --extra-experimental-features "nix-command flakes" build .#book
       - run: mkdir -p output/book output/description_viewer
       - run: cp -LR result/* output/book
-      - run: nix --extra-experimental-features "nix-command flakes" build .#description_website
+      - run: nix --extra-experimental-features "nix-command flakes" build .#description_website_gh_pages
       - run: cp -LR result/* output/description_viewer
       - run: tree output
       - uses: JamesIves/github-pages-deploy-action@v4.4.1
