@@ -4,6 +4,8 @@
 //   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //
 
+use std::collections::HashMap;
+
 use type_description::{AsTypeDescription, TypeDescription};
 
 /// How to configure a kubernetes cluster
@@ -25,6 +27,7 @@ pub struct KubeConfig {
     pub current_context: String,
     pub kind: String,
     pub users: Vec<User>,
+    pub values: HashMap<String, bool>,
 }
 
 #[derive(Debug, TypeDescription)]
