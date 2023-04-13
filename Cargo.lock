@@ -82,6 +82,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d261e256854913907f67ed06efbc3338dfe6179796deefc1ff763fc1aee5535"
 
 [[package]]
+name = "bytesize"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38fcc2979eff34a4b84e1cf9a1e3da42a7d44b3b690a40cdcb23e3d556cfb2e5"
+
+[[package]]
 name = "cc"
 version = "1.0.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -768,8 +774,9 @@ dependencies = [
 
 [[package]]
 name = "type_description"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
+ "bytesize",
  "clap",
  "indexmap",
  "nu-ansi-term",
@@ -785,7 +792,7 @@ dependencies = [
 
 [[package]]
 name = "type_description_derive"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
