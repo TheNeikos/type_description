@@ -322,6 +322,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fed44880c466736ef9a5c5b5facefb5ed0785676d0c02d612db14e54f0d84286"
 
 [[package]]
+name = "human-repr"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d0fb489e3108b684bba475a4cb9804260365870e2f60058265e3d0a3b309bdb1"
+
+[[package]]
 name = "idna"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -778,6 +784,7 @@ version = "0.4.0"
 dependencies = [
  "bytesize",
  "clap",
+ "human-repr",
  "indexmap",
  "nu-ansi-term",
  "pretty",

@@ -315,6 +315,112 @@ impl_config_kind!(TypeKind::String; "String"; "An URL" => url::Url);
 #[cfg(feature = "uuid")]
 impl_config_kind!(TypeKind::String; "String"; "A UUID" => uuid::Uuid);
 
+#[cfg(feature = "human_repr")]
+impl<T> AsTypeDescription for human_repr::HumanCountData<T> {
+    fn as_type_description() -> TypeDescription {
+        TypeDescription::new(
+            "String".into(),
+            TypeKind::String,
+            Some(indoc::indoc! {r#"
+                A String that represents a count of something
+
+                ## Examples
+
+                A number of bytes:
+
+                ```
+                43.21GB
+                ```
+
+                A number of "Packets":
+
+                ```
+                123.5kPackets
+                ```
+
+                74893200 of something unspecified:
+
+                ```
+                74.9M
+                ```
+
+                ## More information
+
+                For more information have a look at the documentation of
+                [the human_repr crate](https://docs.rs/human_repr).
+            "#}),
+        )
+    }
+}
+
+#[cfg(feature = "human_repr")]
+impl AsTypeDescription for human_repr::HumanDurationData {
+    fn as_type_description() -> TypeDescription {
+        TypeDescription::new(
+            "String".into(),
+            TypeKind::String,
+            Some(indoc::indoc! {r#"
+                A String that represents a duration
+
+                Note that floating point rounding applies.
+
+                ## Examples
+
+                10 milliseconds
+
+                ```
+                10ms
+                ```
+
+                3.435999 seconds:
+
+                ```
+                3.44s
+                ```
+
+                ## More information
+
+                For more information have a look at the documentation of
+                [the human_repr crate](https://docs.rs/human_repr).
+            "#}),
+        )
+    }
+}
+
+#[cfg(feature = "human_repr")]
+impl<T> AsTypeDescription for human_repr::HumanThroughputData<T> {
+    fn as_type_description() -> TypeDescription {
+        TypeDescription::new(
+            "String".into(),
+            TypeKind::String,
+            Some(indoc::indoc! {r#"
+                A String that represents a throughput
+
+                Note that floating point rounding applies.
+
+                ## Examples
+
+                1.2 Megabytes per second:
+
+                ```
+                1.2MB/s
+                ```
+
+                6.1 tests per Minute
+
+                ```
+                6.1tests/m
+                ```
+
+                ## More information
+
+                For more information have a look at the documentation of
+                [the human_repr crate](https://docs.rs/human_repr).
+            "#}),
+        )
+    }
+}
+
 impl_config_kind!(TypeKind::String; "String"; "A filesystem path" => std::path::PathBuf);
 
 #[cfg(test)]

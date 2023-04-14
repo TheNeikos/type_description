@@ -27,6 +27,7 @@ bin = ["render", "dep:clap", "dep:serde_json", "dep:term_size"]
 bytesize = ["dep:bytesize"]
 url = ["dep:url"]
 uuid = ["dep:uuid"]
+human-repr = ["dep:human-repr"]
 
 [dependencies]
 clap = { version = "4.2.2", features = ["derive"], optional = true }
@@ -42,6 +43,7 @@ type_description_derive = { version = "0.5.0", path = "type_description_derive" 
 bytesize = { version = "1", optional = true }
 url = { version = "2", optional = true }
 uuid = { version = "1", optional = true }
+human-repr = { version = "1", optional = true }
 
 [dev-dependencies]
 serde = { version = "1.0.159", features = ["derive"] }
