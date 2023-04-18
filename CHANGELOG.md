@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.4.0
+
+This is the fourth public release of the `type_description` crate.
+
+The main addition this time are:
+
+- Added support for the uuid crate, behind a feature-gate
+- Added support for the bytesize crate, behind a feature-gate
+
 ## v0.3.0
 
 This is the third public release of the `type_description` crate.
