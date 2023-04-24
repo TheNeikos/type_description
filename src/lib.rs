@@ -8,7 +8,7 @@
 
 use std::{
     borrow::Cow,
-    collections::{HashMap, HashSet, BTreeSet},
+    collections::{BTreeMap, BTreeSet, HashMap, HashSet},
 };
 
 use serde::{Deserialize, Serialize};
@@ -251,6 +251,23 @@ impl<T: AsTypeDescription> AsTypeDescription for Vec<T> {
 }
 
 impl<K: AsTypeDescription, V: AsTypeDescription> AsTypeDescription for HashMap<K, V> {
+    fn as_type_description() -> TypeDescription {
+        TypeDescription::new(
+            format!(
+                "Table of '{} => {}'",
+                K::as_type_description().name(),
+                V::as_type_description().name()
+            ),
+            TypeKind::HashMap {
+                key: Box::new(K::as_type_description()),
+                value: Box::new(V::as_type_description()),
+            },
+            None,
+        )
+    }
+}
+
+impl<K: AsTypeDescription, V: AsTypeDescription> AsTypeDescription for BTreeMap<K, V> {
     fn as_type_description() -> TypeDescription {
         TypeDescription::new(
             format!(
