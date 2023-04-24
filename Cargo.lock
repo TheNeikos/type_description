@@ -508,9 +508,9 @@ checksum = "478c572c3d73181ff3c2539045f6eb99e5491218eae919370993b890cdbdd98e"
 
 [[package]]
 name = "pretty"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9e6db26707236c991e87e751cb259ac03a3930ee4f79af75977a148811c89c0"
+checksum = "563c9d701c3a31dfffaaf9ce23507ba09cbe0b9125ba176d15e629b0235e9acc"
 dependencies = [
  "arrayvec",
  "typed-arena",
@@ -774,7 +774,7 @@ dependencies = [
 
 [[package]]
 name = "type_description"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "bytesize",
  "clap",
@@ -793,7 +793,7 @@ dependencies = [
 
 [[package]]
 name = "type_description_derive"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
