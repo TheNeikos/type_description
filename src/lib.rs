@@ -6,7 +6,10 @@
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
-use std::{borrow::Cow, collections::HashMap};
+use std::{
+    borrow::Cow,
+    collections::{BTreeMap, BTreeSet, HashMap, HashSet},
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -259,6 +262,43 @@ impl<K: AsTypeDescription, V: AsTypeDescription> AsTypeDescription for HashMap<K
                 key: Box::new(K::as_type_description()),
                 value: Box::new(V::as_type_description()),
             },
+            None,
+        )
+    }
+}
+
+impl<K: AsTypeDescription, V: AsTypeDescription> AsTypeDescription for BTreeMap<K, V> {
+    fn as_type_description() -> TypeDescription {
+        TypeDescription::new(
+            format!(
+                "Table of '{} => {}'",
+                K::as_type_description().name(),
+                V::as_type_description().name()
+            ),
+            TypeKind::HashMap {
+                key: Box::new(K::as_type_description()),
+                value: Box::new(V::as_type_description()),
+            },
+            None,
+        )
+    }
+}
+
+impl<T: AsTypeDescription> AsTypeDescription for HashSet<T> {
+    fn as_type_description() -> TypeDescription {
+        TypeDescription::new(
+            format!("List of unique '{}'", T::as_type_description().name(),),
+            TypeKind::Array(Box::new(T::as_type_description())),
+            None,
+        )
+    }
+}
+
+impl<T: AsTypeDescription> AsTypeDescription for BTreeSet<T> {
+    fn as_type_description() -> TypeDescription {
+        TypeDescription::new(
+            format!("List of unique '{}'", T::as_type_description().name(),),
+            TypeKind::Array(Box::new(T::as_type_description())),
             None,
         )
     }
