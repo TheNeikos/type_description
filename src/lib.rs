@@ -8,7 +8,7 @@
 
 use std::{
     borrow::Cow,
-    collections::{HashMap, HashSet},
+    collections::{HashMap, HashSet, BTreeSet},
 };
 
 use serde::{Deserialize, Serialize};
@@ -268,6 +268,16 @@ impl<K: AsTypeDescription, V: AsTypeDescription> AsTypeDescription for HashMap<K
 }
 
 impl<T: AsTypeDescription> AsTypeDescription for HashSet<T> {
+    fn as_type_description() -> TypeDescription {
+        TypeDescription::new(
+            format!("List of unique '{}'", T::as_type_description().name(),),
+            TypeKind::Array(Box::new(T::as_type_description())),
+            None,
+        )
+    }
+}
+
+impl<T: AsTypeDescription> AsTypeDescription for BTreeSet<T> {
     fn as_type_description() -> TypeDescription {
         TypeDescription::new(
             format!("List of unique '{}'", T::as_type_description().name(),),
