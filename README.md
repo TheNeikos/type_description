@@ -1,8 +1,8 @@
 # type_description
 
 ![Bors enabled](https://bors.tech/images/badge_small.svg)
-![docs.rs](https://img.shields.io/docsrs/type_description)
-![crates.io](https://img.shields.io/crates/v/type_description)
+[![docs.rs](https://img.shields.io/docsrs/type_description)](https://docs.rs/type_description)
+[![crates.io](https://img.shields.io/crates/v/type_description)](https://crates.io/crates/type_description)
 
 This crate provides machine-readable descriptions for types.
 
