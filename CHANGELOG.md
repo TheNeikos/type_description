@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.0
+
+This is the fifth public release of the `type_description` crate.
+
+The main addition this time are:
+
+- Added support for BTreeMap, BTreeSet and HashSet
+- Fixed support for struct enums
+
 ## v0.4.0
 
 This is the fourth public release of the `type_description` crate.
