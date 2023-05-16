@@ -774,7 +774,7 @@ dependencies = [
 
 [[package]]
 name = "type_description"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "bytesize",
  "clap",
@@ -793,7 +793,7 @@ dependencies = [
 
 [[package]]
 name = "type_description_derive"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
