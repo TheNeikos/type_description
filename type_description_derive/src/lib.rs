@@ -256,11 +256,16 @@ impl<'q> ToTokens for TypeQuote<'q> {
                             let fields = fields.iter().map(|field| {
 
                                 match field {
-                                    TypeField::Simple { ident, ty, docs, optional: _ } =>  {
+                                    TypeField::Simple { ident, ty, docs, optional } =>  {
                                         let ident = ident.to_string();
                                         let docs = lit_strings_to_string_quoted(docs);
                                         quote! {
-                                            (#ident, #docs, <#ty as ::type_description::AsTypeDescription>::as_type_description())
+                                            ::type_description::StructField::new(
+                                                #ident,
+                                                #docs,
+                                                <#ty as ::type_description::AsTypeDescription>::as_type_description(),
+                                                #optional,
+                                            )
                                         }
                                     }
                                     TypeField::Flatten { ty: _ } => {
@@ -269,6 +274,8 @@ impl<'q> ToTokens for TypeQuote<'q> {
                                 }
 
                             });
+
+                            let ident = ident.to_string();
                             quote! {
                                 ::type_description::EnumVariant::new(
                                     #ident,
@@ -279,7 +286,7 @@ impl<'q> ToTokens for TypeQuote<'q> {
                                             ::type_description::TypeKind::Struct({
                                                 let mut fields = vec![];
                                                 #(
-                                                    fields.extend(#fields);
+                                                    fields.push(#fields);
                                                  )*
                                                 fields
                                             }),
