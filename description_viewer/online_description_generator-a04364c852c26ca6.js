@@ -426,7 +426,7 @@ function initSync(module) {
 
 async function init(input) {
     if (typeof input === 'undefined') {
-        input = new URL('online_description_generator-59caef355b209390_bg.wasm', import.meta.url);
+        input = new URL('online_description_generator-a04364c852c26ca6_bg.wasm', import.meta.url);
     }
     const imports = getImports();
 
