@@ -41,7 +41,7 @@ fn start_app() {
 
         let location = document.location().unwrap();
 
-        let encoded_input = base64::engine::general_purpose::URL_SAFE.encode(&input.value());
+        let encoded_input = base64::engine::general_purpose::URL_SAFE.encode(input.value());
 
         location.set_hash(&encoded_input).unwrap();
 
