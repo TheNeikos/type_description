@@ -200,7 +200,7 @@ function makeMutClosure(arg0, arg1, dtor, f) {
     return real;
 }
 function __wbg_adapter_12(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h4461c4a5709e1056(arg0, arg1, addHeapObject(arg2));
+    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__haa6ec24fbd6a37a9(arg0, arg1, addHeapObject(arg2));
 }
 
 function isLikeNone(x) {
@@ -426,7 +426,7 @@ function initSync(module) {
 
 async function init(input) {
     if (typeof input === 'undefined') {
-        input = new URL('online_description_generator-d4d2f3e728cc7b03_bg.wasm', import.meta.url);
+        input = new URL('online_description_generator-2ff27722c7330379_bg.wasm', import.meta.url);
     }
     const imports = getImports();
 
