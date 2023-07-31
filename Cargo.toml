@@ -33,8 +33,8 @@ clap = { version = "4.3.19", features = ["derive"], optional = true }
 indexmap = { version = "2.0.0", optional = true }
 nu-ansi-term = { version = "0.49.0", optional = true }
 pretty = { version = "0.12.1", optional = true }
-serde = { version = "1.0.175", features = ["derive"] }
-serde_json = { version = "1.0.103", optional = true }
+serde = { version = "1.0.179", features = ["derive"] }
+serde_json = { version = "1.0.104", optional = true }
 term_size = { version = "0.3.2", optional = true }
 termimad = { version = "0.23.1", optional = true }
 type_description_derive = { version = "0.6.0", path = "type_description_derive" }
@@ -44,8 +44,8 @@ url = { version = "2", optional = true }
 uuid = { version = "1", optional = true }
 
 [dev-dependencies]
-serde = { version = "1.0.175", features = ["derive"] }
-serde_json = "1.0.103"
+serde = { version = "1.0.179", features = ["derive"] }
+serde_json = "1.0.104"
 trybuild = "1.0.82"
 
 [package.metadata.docs.rs]
