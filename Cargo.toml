@@ -29,11 +29,11 @@ url = ["dep:url"]
 uuid = ["dep:uuid"]
 
 [dependencies]
-clap = { version = "4.3.23", features = ["derive"], optional = true }
+clap = { version = "4.4.0", features = ["derive"], optional = true }
 indexmap = { version = "2.0.0", optional = true }
 nu-ansi-term = { version = "0.49.0", optional = true }
 pretty = { version = "0.12.1", optional = true }
-serde = { version = "1.0.185", features = ["derive"] }
+serde = { version = "1.0.188", features = ["derive"] }
 serde_json = { version = "1.0.105", optional = true }
 term_size = { version = "0.3.2", optional = true }
 termimad = { version = "0.25.0", optional = true }
@@ -44,7 +44,7 @@ url = { version = "2", optional = true }
 uuid = { version = "1", optional = true }
 
 [dev-dependencies]
-serde = { version = "1.0.185", features = ["derive"] }
+serde = { version = "1.0.188", features = ["derive"] }
 serde_json = "1.0.105"
 trybuild = "1.0.83"
 
