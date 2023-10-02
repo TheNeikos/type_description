@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 base64 = "0.21.4"
 console_error_panic_hook = "0.1.7"
-markdown = "1.0.0-alpha.13"
+markdown = "1.0.0-alpha.14"
 serde_json = "1.0.107"
 type_description = { version = "0.6.0", path = "..", features = ["render_markdown"] }
 wasm-bindgen = "0.2.84"
