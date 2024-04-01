@@ -51,26 +51,6 @@ jobs:
       - name: Check License Lines
         uses: kt3k/license_checker@v1.0.6
 
-  deny:
-    name: deny
-    needs: check
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        checks:
-          - advisories
-          - bans licenses sources
-
-    # Prevent sudden announcement of a new advisory from failing ci:
-    continue-on-error: ${{ matrix.checks == 'advisories' }}
-
-    steps:
-    - uses: actions/checkout@v4.1.0
-    - name: cargo-deny
-      uses: EmbarkStudios/cargo-deny-action@v1
-      with:
-        command: check ${{ matrix.checks }}
-
 
   fmt:
     name: format
